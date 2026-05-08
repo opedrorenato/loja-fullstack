@@ -10,9 +10,11 @@ docker build -t loja-db .
 docker run -d -p 1433:1433 --name loja-db-container loja-db
 ```
 
+Tabelas:
+![](images/loja-bd.png)
+
 Diagrama:
 ![](images/loja-bd-diagrama.png)
-![](images/loja-bd.png)
 
 Tabela Cliente:
 ![](images/loja-bd-tb-cliente.png)
@@ -25,3 +27,13 @@ Tabela Pedido:
 
 Tabela ItensPedido:
 ![](images/loja-bd-tb-itenspedido.png)
+
+---
+
+## Frontend
+
+---
+
+## Backend
+
+---

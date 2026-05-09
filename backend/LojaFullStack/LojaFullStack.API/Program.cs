@@ -1,3 +1,8 @@
+using LojaFullStack.API.Infrastructure;
+using LojaFullStack.API.Repositories;
+using LojaFullStack.API.Repositories.Interfaces;
+using LojaFullStack.API.Services;
+using LojaFullStack.API.Services.Interfaces;
 using Microsoft.OpenApi;
 
 // Builder
@@ -5,6 +10,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Controllers
 builder.Services.AddControllers();
+
+// Connection Factory
+builder.Services.AddSingleton<DbConnectionFactory>();
+
+// Services
+builder.Services.AddScoped<IClienteService, ClienteService>();
+builder.Services.AddScoped<IProdutoService, ProdutoService>();
+builder.Services.AddScoped<IPedidoService, PedidoService>();
+
+// Repositories
+builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();

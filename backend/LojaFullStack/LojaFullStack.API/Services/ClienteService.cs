@@ -17,19 +17,30 @@ public class ClienteService : IClienteService
     public async Task<IEnumerable<ClienteResponseDto>> GetAllAsync()
     {
         var clientes = await _clienteRepository.GetAllAsync();
-        return clientes.Select(ToResponseDto);
+        var result = clientes.Select(ToResponseDto);
+        return result.OrderBy(x => x.CodCliente);
     }
 
     public async Task<ClienteResponseDto?> GetByIdAsync(int id)
     {
         var cliente = await _clienteRepository.GetByIdAsync(id);
-        return cliente is null ? null : ToResponseDto(cliente);
+
+        if (cliente is null)
+            return null;
+
+        var result = ToResponseDto(cliente);
+        return result;
     }
 
     public async Task<ClienteResponseDto?> GetByCNPJAsync(string cnpj)
     {
         var cliente = await _clienteRepository.GetByCNPJAsync(cnpj);
-        return cliente is null ? null : ToResponseDto(cliente);
+
+        if (cliente is null)
+            return null;
+
+        var result = ToResponseDto(cliente);
+        return result;
     }
 
     public async Task<ClienteResponseDto> CreateAsync(ClienteRequestDto dto)
@@ -51,6 +62,8 @@ public class ClienteService : IClienteService
         return ToResponseDto(criado!);
     }
 
+    #region Utils
+
     private static ClienteResponseDto ToResponseDto(Cliente c) => new()
     {
         CodCliente = c.CodCliente,
@@ -59,4 +72,6 @@ public class ClienteService : IClienteService
         Email = c.Email,
         DataCadastro = c.DataCadastro
     };
+
+    #endregion
 }

@@ -23,12 +23,14 @@ public class PedidoService : IPedidoService
 
     public async Task<IEnumerable<PedidoResponseDto>> GetAllAsync(DateTime? dataInicio, DateTime? dataFim, string? cnpj)
     {
-        return await _pedidoRepository.GetAllAsync(dataInicio, dataFim, cnpj);
+        var result = await _pedidoRepository.GetAllAsync(dataInicio, dataFim, cnpj);
+        return result.OrderBy(x => x.CodPedido);
     }
 
     public async Task<PedidoResponseDto?> GetByIdAsync(int id)
     {
-        return await _pedidoRepository.GetByIdAsync(id);
+        var result = await _pedidoRepository.GetByIdAsync(id);
+        return result;
     }
 
     public async Task<PedidoResponseDto> CreateAsync(PedidoRequestDto dto)

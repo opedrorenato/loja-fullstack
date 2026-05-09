@@ -2,39 +2,51 @@
 using LojaFullStack.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LojaFullStack.API.Controllers
+namespace LojaFullStack.API.Controllers;
+
+[Route("api/[controller]/[action]")]
+[ApiController]
+public class ProdutoController : ControllerBase
 {
-    [Route("api/[controller]/[action]")]
-    [ApiController]
-    public class ProdutoController : ControllerBase
+    private readonly IProdutoService _produtoService;
+
+    public ProdutoController(IProdutoService produtoService)
     {
-        private readonly IProdutoService _produtoService;
+        _produtoService = produtoService;
+    }
 
-        public ProdutoController(IProdutoService produtoService)
-        {
-            _produtoService = produtoService;
-        }
+    /// <summary>
+    /// Lista todos os produtos disponíveis
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var produtos = await _produtoService.GetAllAsync();
+        return Ok(produtos);
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var produtos = await _produtoService.GetAllAsync();
-            return Ok(produtos);
-        }
+    /// <summary>
+    /// Busca um produto pelo ID
+    /// </summary>
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var produto = await _produtoService.GetByIdAsync(id);
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var produto = await _produtoService.GetByIdAsync(id);
-            if (produto is null) return NotFound("Produto não encontrado.");
-            return Ok(produto);
-        }
+        if (produto is null)
+            return NotFound("Produto não encontrado.");
 
-        [HttpPost]
-        public async Task<IActionResult> Create(ProdutoRequestDto dto)
-        {
-            var produto = await _produtoService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = produto.CodProduto }, produto);
-        }
+        return Ok(produto);
+    }
+
+    /// <summary>
+    /// Cadastra um novo produto
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> Create(ProdutoRequestDto dto)
+    {
+        var produto = await _produtoService.CreateAsync(dto);
+        var result = CreatedAtAction(nameof(GetById), new { id = produto.CodProduto }, produto);
+        return result;
     }
 }

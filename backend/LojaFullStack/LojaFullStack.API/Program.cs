@@ -4,6 +4,7 @@ using LojaFullStack.API.Repositories.Interfaces;
 using LojaFullStack.API.Services;
 using LojaFullStack.API.Services.Interfaces;
 using Microsoft.OpenApi;
+using System.Reflection;
 
 // Builder
 var builder = WebApplication.CreateBuilder(args);
@@ -32,8 +33,26 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Loja FullStack - API",
         Version = "v1",
-        Description = "API do sistema de vendas da Loja FullStack"
+        Description = """
+            API do sistema de vendas da loja.
+            
+            ## Funcionalidades
+            - Gerenciamento de clientes
+            - Gerenciamento de produtos e estoque
+            - Criação e gerenciamento de pedidos
+            
+            ## Regras de Negócio
+            - Um produto só pode ser adicionado ao pedido se houver estoque disponível
+            - O valor total do pedido é atualizado automaticamente a cada alteração
+            - O estoque é decrementado ao adicionar um item e devolvido ao remover
+            """
     });
+
+    // Habilita comentários XML
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+        c.IncludeXmlComments(xmlPath);
 });
 
 // CORS — libera o frontend Next.js acessar a API

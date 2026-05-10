@@ -42,6 +42,13 @@ docker run -d -p 5000:5000 -e ConnectionStrings__DefaultConnection="Server=host.
 
 ## Frontend
 
+```bash
+cd frontend
+npm run dev -p 4000
+```
+
+![alt text](images/frontend.png)
+
 ---
 
 ## Docker Compose

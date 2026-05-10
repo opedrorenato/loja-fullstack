@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LojaFullStack.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]/[action]")]
+[Route("api/[controller]")]
 public class ClienteController : ControllerBase
 {
     private readonly IClienteService _clienteService;
@@ -28,7 +28,7 @@ public class ClienteController : ControllerBase
     /// <summary>
     /// Busca um cliente pelo ID
     /// </summary>
-    [HttpGet("{id}")]
+    [HttpGet("id/{id}")]
     public async Task<IActionResult> GetById(int id)
     {
         var cliente = await _clienteService.GetByIdAsync(id);

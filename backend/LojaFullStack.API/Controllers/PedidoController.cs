@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LojaFullStack.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]/[action]")]
+[Route("api/[controller]")]
 public class PedidoController : ControllerBase
 {
     private readonly IPedidoService _pedidoService;

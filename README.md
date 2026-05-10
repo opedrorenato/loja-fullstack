@@ -30,10 +30,16 @@ Tabela ItensPedido:
 
 ---
 
-## Frontend
+## Backend
+
+```bash
+cd backend\LojaFullStack.API
+docker build -t loja-backend .
+docker run -d -p 5000:5000 -e ConnectionStrings__DefaultConnection="Server=host.docker.internal,1433;Database=LojaDB;User Id=sa;Password=SenhaForte!123;TrustServerCertificate=True;" --name loja-backend-container loja-backend
+```
 
 ---
 
-## Backend
+## Frontend
 
 ---

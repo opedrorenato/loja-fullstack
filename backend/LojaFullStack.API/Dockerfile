@@ -15,6 +15,8 @@ RUN dotnet publish LojaFullStack.API.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
+ENV ASPNETCORE_URLS=http://+:5000
+
 COPY --from=build /app/publish .
 
 EXPOSE 5000

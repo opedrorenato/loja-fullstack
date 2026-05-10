@@ -18,15 +18,7 @@ const sizes = {
     lg: "max-w-2xl",
 };
 
-export function Modal({
-    open,
-    title,
-    onClose,
-    children,
-    footer,
-    size = "md",
-}: ModalProps) {
-    // Fecha com ESC
+export function Modal({ open, title, onClose, children, footer, size = "md" }: ModalProps) {
     useEffect(() => {
         function handleKey(e: KeyboardEvent) {
             if (e.key === "Escape") onClose();
@@ -39,30 +31,20 @@ export function Modal({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
-            <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={onClose}
-            />
-
-            {/* Modal */}
-            <div
-                className={`relative z-10 w-full ${sizes[size]} mx-4 bg-white rounded-xl shadow-xl`}
-            >
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+            <div className={`relative z-10 w-full ${sizes[size]} mx-4 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl`}>
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b">
-                    <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
-                    <Button variant="ghost" size="sm" onClick={onClose}>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+                    <h2 className="text-lg font-semibold text-white">{title}</h2>
+                    <Button variant="ghost" size="sm" onClick={onClose} className="text-slate-400 hover:text-white">
                         ✕
                     </Button>
                 </div>
-
                 {/* Body */}
                 <div className="px-6 py-4">{children}</div>
-
                 {/* Footer */}
                 {footer && (
-                    <div className="flex justify-end gap-2 px-6 py-4 border-t bg-gray-50 rounded-b-xl">
+                    <div className="flex justify-end gap-2 px-6 py-4 border-t border-slate-700 bg-slate-900/40 rounded-b-xl">
                         {footer}
                     </div>
                 )}

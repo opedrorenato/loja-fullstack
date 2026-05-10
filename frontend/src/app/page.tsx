@@ -9,80 +9,108 @@ import { Modal } from "@/components/ui/Modal";
 import { Table } from "@/components/ui/Table";
 import { pedidoService } from "@/services/pedido-service";
 import { clienteService } from "@/services/cliente-service";
-import { PedidoResponse } from "@/types";
+import { PedidoResponse, ClienteResponse } from "@/types";
 
 export default function PedidosPage() {
   const router = useRouter();
 
-  // ── Estado da listagem ──────────────────────────────────────
   const [pedidos, setPedidos] = useState<PedidoResponse[]>([]);
+  const [pedidosFiltrados, setPedidosFiltrados] = useState<PedidoResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
 
-  // ── Estado dos filtros ──────────────────────────────────────
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const [cnpjFiltro, setCnpjFiltro] = useState("");
 
-  // ── Estado do modal de criação ──────────────────────────────
   const [modalAberto, setModalAberto] = useState(false);
   const [cnpj, setCnpj] = useState("");
   const [erroCnpj, setErroCnpj] = useState("");
   const [criando, setCriando] = useState(false);
 
-  // ── Busca pedidos ───────────────────────────────────────────
+  const [clientes, setClientes] = useState<ClienteResponse[]>([]);
+  const [clientesFiltrados, setClientesFiltrados] = useState<ClienteResponse[]>([]);
+  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
+
   const buscarPedidos = useCallback(async () => {
     setLoading(true);
     setErro("");
     try {
-      const data = await pedidoService.getAll({
-        dataInicio: dataInicio || undefined,
-        dataFim: dataFim || undefined,
-        cnpj: cnpjFiltro || undefined,
-      });
-      setPedidos(data);
+      const [pedidosData, clientesData] = await Promise.all([
+        pedidoService.getAll({
+          dataInicio: dataInicio || undefined,
+          dataFim: dataFim || undefined,
+        }),
+        clienteService.getAll(),
+      ]);
+      setPedidos(pedidosData);
+      setClientes(clientesData);
     } catch {
       setErro("Erro ao carregar pedidos.");
     } finally {
       setLoading(false);
     }
-  }, [dataInicio, dataFim, cnpjFiltro]);
+  }, [dataInicio, dataFim]);
 
   useEffect(() => {
     buscarPedidos();
   }, [buscarPedidos]);
 
-  // ── Limpar filtros ──────────────────────────────────────────
+  useEffect(() => {
+    if (!cnpj.trim()) {
+      setClientesFiltrados([]);
+      return;
+    }
+    const termo = cnpj.replace(/\D/g, "");
+    setClientesFiltrados(
+      clientes.filter((c) => c.cnpj.replace(/\D/g, "").includes(termo))
+    );
+  }, [cnpj, clientes]);
+
+  // Filtro de CNPJ em memória
+  useEffect(() => {
+    if (!cnpjFiltro.trim()) {
+      setPedidosFiltrados(pedidos);
+      return;
+    }
+    const termo = cnpjFiltro.replace(/\D/g, "");
+    setPedidosFiltrados(
+      pedidos.filter((p) =>
+        p.cnpjCliente.replace(/\D/g, "").includes(termo)
+      )
+    );
+  }, [cnpjFiltro, pedidos]);
+
   function limparFiltros() {
     setDataInicio("");
     setDataFim("");
     setCnpjFiltro("");
   }
 
-  // ── Criar pedido ────────────────────────────────────────────
   async function handleCriarPedido() {
     if (!cnpj.trim()) {
       setErroCnpj("Informe o CNPJ do cliente.");
       return;
     }
 
+    const clienteEncontrado = clientes.find(
+      (c) => c.cnpj.replace(/\D/g, "") === cnpj.replace(/\D/g, "")
+    );
+
+    if (!clienteEncontrado) {
+      setErroCnpj("Nenhum cliente encontrado com esse CNPJ.");
+      return;
+    }
+
     setCriando(true);
     setErroCnpj("");
-
     try {
-      // Valida se o cliente existe antes de criar
-      await clienteService.getByCnpj(cnpj);
-
-      const pedido = await pedidoService.create({ cnpj });
+      const pedido = await pedidoService.create({ cnpj: clienteEncontrado.cnpj });
       setModalAberto(false);
       setCnpj("");
       router.push(`/novo-pedido?pedidoId=${pedido.codPedido}`);
     } catch (e: unknown) {
-      if (e instanceof Error) {
-        setErroCnpj(e.message.includes("404") || e.message.includes("não encontrado")
-          ? "Nenhum cliente encontrado com esse CNPJ."
-          : e.message);
-      }
+      if (e instanceof Error) setErroCnpj(e.message);
     } finally {
       setCriando(false);
     }
@@ -94,20 +122,12 @@ export default function PedidosPage() {
     setErroCnpj("");
   }
 
-  // ── Formatações ─────────────────────────────────────────────
   function formatarData(data: string) {
     return new Date(data).toLocaleDateString("pt-BR");
   }
 
   function formatarValor(valor: number) {
     return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  }
-
-  function formatarCnpj(cnpj: string) {
-    return cnpj.replace(
-      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
-      "$1.$2.$3/$4-$5"
-    );
   }
 
   return (
@@ -123,107 +143,173 @@ export default function PedidosPage() {
       <div className="p-8 flex flex-col gap-6">
 
         {/* Filtros */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-sm font-medium text-gray-600 mb-3">Filtrar pedidos</p>
+        <div className="bg-slate-800 rounded-xl border border-slate-700 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-semibold text-slate-300">🔍 Filtrar pedidos</p>
+            {(dataInicio || dataFim || cnpjFiltro) && (
+              <button
+                onClick={limparFiltros}
+                className="text-xs text-blue-400 hover:underline"
+              >
+                Limpar filtros
+              </button>
+            )}
+          </div>
           <div className="flex flex-wrap gap-3 items-end">
             <Input
               label="Data inicial"
               type="date"
               value={dataInicio}
               onChange={(e) => setDataInicio(e.target.value)}
-              className="w-40"
+              className="w-44"
             />
             <Input
               label="Data final"
               type="date"
               value={dataFim}
               onChange={(e) => setDataFim(e.target.value)}
-              className="w-40"
+              className="w-44"
             />
             <Input
               label="CNPJ do cliente"
-              placeholder="00.000.000/0000-00"
+              placeholder="Digite para filtrar..."
               mask="cnpj"
               value={cnpjFiltro}
               onChange={(e) => setCnpjFiltro(e.target.value)}
-              className="w-52"
+              className="w-56"
             />
-            <Button variant="secondary" onClick={limparFiltros}>
-              Limpar
-            </Button>
           </div>
         </div>
 
         {/* Erro */}
         {erro && (
-          <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+          <div className="bg-red-900/40 border border-red-700 text-red-400 rounded-lg px-4 py-3 text-sm">
             {erro}
           </div>
         )}
 
         {/* Tabela */}
-        <Table
-          loading={loading}
-          data={pedidos}
-          keyExtractor={(p) => p.codPedido}
-          onRowClick={(p) => router.push(`/pedidos/${p.codPedido}`)}
-          emptyMessage="Nenhum pedido encontrado."
-          columns={[
-            { header: "#", accessor: (p) => `#${p.codPedido}`, className: "w-16" },
-            { header: "Cliente", accessor: "nomeCliente" },
-            { header: "CNPJ", accessor: (p) => formatarCnpj(p.cnpjCliente.replace(/\D/g, "")) },
-            { header: "Data", accessor: (p) => formatarData(p.dataPedido) },
-            { header: "Itens", accessor: (p) => `${p.itens.length} item(s)` },
-            { header: "Total", accessor: (p) => formatarValor(p.valorTotal) },
-            {
-              header: "",
-              accessor: (p) => (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(`/pedidos/${p.codPedido}`);
-                  }}
-                >
-                  Ver detalhes →
-                </Button>
-              ),
-            },
-          ]}
-        />
+        <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-700">
+            <p className="text-sm font-semibold text-slate-300">
+              {loading ? "Carregando..." : `${pedidosFiltrados.length} pedido(s) encontrado(s)`}
+            </p>
+          </div>
+          <Table
+            loading={loading}
+            data={pedidosFiltrados}
+            keyExtractor={(p) => p.codPedido}
+            onRowClick={(p) => router.push(`/pedidos/${p.codPedido}`)}
+            emptyMessage="Nenhum pedido encontrado."
+            columns={[
+              {
+                header: "#",
+                accessor: (p) => (
+                  <span className="font-mono text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded">
+                    #{p.codPedido}
+                  </span>
+                ),
+                className: "w-16",
+              },
+              {
+                header: "Cliente",
+                accessor: (p) => (
+                  <span className="font-medium text-slate-200">{p.nomeCliente}</span>
+                ),
+              },
+              {
+                header: "CNPJ",
+                accessor: (p) => (
+                  <span className="font-mono text-xs text-slate-400">{p.cnpjCliente}</span>
+                ),
+              },
+              {
+                header: "Data",
+                accessor: (p) => formatarData(p.dataPedido),
+              },
+              {
+                header: "Total",
+                accessor: (p) => (
+                  <span className="font-semibold text-blue-400">
+                    {formatarValor(p.valorTotal)}
+                  </span>
+                ),
+              },
+              {
+                header: "",
+                accessor: (p) => (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/pedidos/${p.codPedido}`);
+                    }}
+                  >
+                    Ver detalhes →
+                  </Button>
+                ),
+              },
+            ]}
+          />
+        </div>
       </div>
 
-      {/* Modal de criação de pedido */}
+      {/* Modal */}
       <Modal
         open={modalAberto}
         title="Novo Pedido"
         onClose={handleFecharModal}
         footer={
           <>
-            <Button variant="secondary" onClick={handleFecharModal}>
-              Cancelar
-            </Button>
-            <Button loading={criando} onClick={handleCriarPedido}>
-              Criar Pedido
-            </Button>
+            <Button variant="secondary" onClick={handleFecharModal}>Cancelar</Button>
+            <Button loading={criando} onClick={handleCriarPedido}>Criar Pedido</Button>
           </>
         }
       >
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-400">
             Informe o CNPJ do cliente para criar um novo pedido.
             O cliente deve estar previamente cadastrado no sistema.
           </p>
-          <Input
-            label="CNPJ do cliente"
-            placeholder="00.000.000/0000-00"
-            mask="cnpj"
-            value={cnpj}
-            onChange={(e) => setCnpj(e.target.value)}
-            error={erroCnpj}
-            autoFocus
-          />
+
+          <div className="relative">
+            <Input
+              label="CNPJ do cliente"
+              placeholder="00.000.000/0000-00"
+              mask="cnpj"
+              value={cnpj}
+              onChange={(e) => {
+                setCnpj(e.target.value);
+                setMostrarSugestoes(true);
+                setErroCnpj("");
+              }}
+              onFocus={() => setMostrarSugestoes(true)}
+              onBlur={() => setTimeout(() => setMostrarSugestoes(false), 150)}
+              error={erroCnpj}
+              autoFocus
+            />
+
+            {/* Dropdown de sugestões */}
+            {mostrarSugestoes && clientesFiltrados.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg shadow-xl overflow-hidden">
+                {clientesFiltrados.map((c) => (
+                  <button
+                    key={c.codCliente}
+                    onMouseDown={() => {
+                      setCnpj(c.cnpj);
+                      setMostrarSugestoes(false);
+                      setErroCnpj("");
+                    }}
+                    className="w-full px-4 py-2.5 text-left hover:bg-slate-600 transition-colors"
+                  >
+                    <p className="text-sm font-medium text-white">{c.nome}</p>
+                    <p className="text-xs text-slate-400 font-mono">{c.cnpj}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </Modal>
     </>

@@ -22,9 +22,9 @@ export function Table<T>({
     loading = false,
 }: TableProps<T>) {
     return (
-        <div className="w-full overflow-x-auto rounded-xl border border-gray-200">
+        <div className="w-full overflow-x-auto rounded-xl border border-slate-700">
             <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+                <thead className="bg-slate-700/50 text-slate-400 uppercase text-xs">
                     <tr>
                         {columns.map((col, i) => (
                             <th
@@ -36,7 +36,7 @@ export function Table<T>({
                         ))}
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-slate-700">
                     {loading ? (
                         <tr>
                             <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-400">
@@ -54,11 +54,11 @@ export function Table<T>({
                             <tr
                                 key={keyExtractor(row)}
                                 onClick={() => onRowClick?.(row)}
-                                className={`bg-white transition-colors ${onRowClick ? "cursor-pointer hover:bg-blue-50" : ""
+                                className={`bg-slate-800 transition-colors ${onRowClick ? "cursor-pointer hover:bg-slate-700" : ""
                                     }`}
                             >
                                 {columns.map((col, i) => (
-                                    <td key={i} className={`px-4 py-3 text-gray-700 ${col.className ?? ""}`}>
+                                    <td key={i} className={`px-4 py-3 text-slate-400 ${col.className ?? ""}`}>
                                         {typeof col.accessor === "function"
                                             ? col.accessor(row)
                                             : String(row[col.accessor] ?? "")}

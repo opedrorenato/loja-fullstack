@@ -29,30 +29,29 @@ function applyMask(value: string, mask?: "cnpj" | "currency"): string {
 export const Input = forwardRef<HTMLInputElement, InputProps>(
     ({ label, error, mask, onChange, className = "", ...props }, ref) => {
         function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-            if (mask) {
-                e.target.value = applyMask(e.target.value, mask);
-            }
+            if (mask) e.target.value = applyMask(e.target.value, mask);
             onChange?.(e);
         }
 
         return (
             <div className="flex flex-col gap-1">
                 {label && (
-                    <label className="text-sm font-medium text-gray-700">{label}</label>
+                    <label className="text-sm font-medium text-slate-300">{label}</label>
                 )}
                 <input
                     ref={ref}
                     onChange={handleChange}
                     className={`
             w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors
-            border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100
-            disabled:bg-gray-50 disabled:cursor-not-allowed
-            ${error ? "border-red-500 focus:border-red-500 focus:ring-red-100" : ""}
+            bg-slate-700 text-white placeholder-slate-500
+            border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
+            disabled:opacity-50 disabled:cursor-not-allowed
+            ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}
             ${className}
           `}
                     {...props}
                 />
-                {error && <span className="text-xs text-red-500">{error}</span>}
+                {error && <span className="text-xs text-red-400">{error}</span>}
             </div>
         );
     }

@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={`${geist.className} bg-gray-50`}>
+      <body className={`${geist.className} bg-slate-900`}>
         <div className="flex min-h-screen">
           <Sidebar />
           <main className="flex-1 flex flex-col overflow-auto">

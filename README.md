@@ -43,3 +43,9 @@ docker run -d -p 5000:5000 -e ConnectionStrings__DefaultConnection="Server=host.
 ## Frontend
 
 ---
+
+## Docker Compose
+
+```bash
+docker-compose up -d --build
+```

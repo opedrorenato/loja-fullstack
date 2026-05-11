@@ -1,3 +1,5 @@
+import { Spinner } from "./Spinner";
+
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
 type ButtonSize = "sm" | "md" | "lg";
 
@@ -41,9 +43,7 @@ export function Button({
       `}
             {...props}
         >
-            {loading && (
-                <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            )}
+            {loading && <Spinner size="sm" className="border-current" />}
             {children}
         </button>
     );

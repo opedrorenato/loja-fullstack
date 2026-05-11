@@ -2,10 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Header } from "@/components/layout/Header";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
-import { Table } from "@/components/ui/Table";
+import { Button, Input, Modal, Table, Badge, Card } from "@/components/ui";
 import { clienteService } from "@/services/cliente-service";
 import { ClienteResponse } from "@/types";
 import { formatarCnpj, formatarData } from "@/utils/format";
@@ -195,13 +192,10 @@ export default function ClientesPage() {
                     </div>
                 )}
 
-                <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-                    <div className="px-5 py-4 border-b border-slate-700">
-                        <p className="text-sm font-semibold text-slate-300">
-                            {loading ? "Carregando..." : `${clientes.length} cliente(s) encontrado(s)`}
-                        </p>
-                    </div>
-
+                <Card
+                    title={loading ? "Carregando..." : `${clientes.length} cliente(s) encontrado(s)`}
+                    noPadding
+                >
                     <Table
                         loading={loading}
                         data={clientesPaginados}
@@ -211,9 +205,9 @@ export default function ClientesPage() {
                             {
                                 header: "#",
                                 accessor: (c) => (
-                                    <span className="font-mono text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded">
+                                    <Badge variant="secondary" className="font-mono">
                                         #{c.codCliente}
-                                    </span>
+                                    </Badge>
                                 ),
                                 className: "w-16",
                             },
@@ -296,7 +290,7 @@ export default function ClientesPage() {
                             </div>
                         </div>
                     )}
-                </div>
+                </Card>
             </div>
 
             {/* Modal Novo Cliente */}

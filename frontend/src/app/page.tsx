@@ -3,14 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/layout/Header";
-import { Button } from "@/components/ui/Button";
-import { formatarCnpj, formatarData, formatarMoeda } from "@/utils/format";
-import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
-import { Table } from "@/components/ui/Table";
+import { Button, Input, Modal, Table, Badge, Card } from "@/components/ui";
 import { pedidoService } from "@/services/pedido-service";
 import { clienteService } from "@/services/cliente-service";
 import { PedidoResponse, ClienteResponse } from "@/types";
+import { formatarData, formatarCnpj, formatarMoeda } from "@/utils/format";
 
 export default function PedidosPage() {
   const router = useRouter();
@@ -27,7 +24,7 @@ export default function PedidosPage() {
   const [modalAberto, setModalAberto] = useState(false);
   const [cnpj, setCnpj] = useState("");
   const [erroCnpj, setErroCnpj] = useState("");
-  const [criando, setCriando] = useState(false); // TO-DO: REMOVER?
+  const [criando] = useState(false);
 
   const [clientes, setClientes] = useState<ClienteResponse[]>([]);
   const [clientesFiltrados, setClientesFiltrados] = useState<ClienteResponse[]>([]);
@@ -126,217 +123,214 @@ export default function PedidosPage() {
   const pedidosPaginados = pedidosFiltrados.slice(inicio, fim);
 
   return (
-  <>
-    <Header
-      title="Pedidos"
-      subtitle="Gerencie todos os pedidos da loja"
-      actions={
-        <Button onClick={() => setModalAberto(true)}>+ Novo Pedido</Button>
-      }
-    />
+    <>
+      <Header
+        title="Pedidos"
+        subtitle="Gerencie todos os pedidos da loja"
+        actions={
+          <Button onClick={() => setModalAberto(true)}>+ Novo Pedido</Button>
+        }
+      />
 
-    <div className="p-8 flex flex-col gap-6">
+      <div className="p-8 flex flex-col gap-6">
 
-      {/* Filtros */}
-      <div className="bg-slate-800 rounded-xl border border-slate-700 p-5">
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm font-semibold text-slate-300">🔍 Filtrar pedidos</p>
-          {(dataInicio || dataFim || cnpjFiltro) && (
-            <button
-              onClick={limparFiltros}
-              className="text-xs text-blue-400 hover:underline"
-            >
-              Limpar filtros
-            </button>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-3 items-end">
-          <Input
-            label="Data inicial"
-            type="date"
-            value={dataInicio}
-            onChange={(e) => setDataInicio(e.target.value)}
-            className="w-44"
-          />
-          <Input
-            label="Data final"
-            type="date"
-            value={dataFim}
-            onChange={(e) => setDataFim(e.target.value)}
-            className="w-44"
-          />
-          <Input
-            label="CNPJ do cliente"
-            placeholder="Digite para filtrar..."
-            mask="cnpj"
-            value={cnpjFiltro}
-            onChange={(e) => setCnpjFiltro(e.target.value)}
-            className="w-56"
-          />
-        </div>
-      </div>
-
-      {/* Erro */}
-      {erro && (
-        <div className="bg-red-900/40 border border-red-700 text-red-400 rounded-lg px-4 py-3 text-sm">
-          {erro}
-        </div>
-      )}
-
-      {/* Tabela */}
-      <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-700">
-          <p className="text-sm font-semibold text-slate-300">
-            {loading ? "Carregando..." : `${pedidosFiltrados.length} pedido(s) encontrado(s)`}
-          </p>
-        </div>
-        <Table
-          loading={loading}
-          data={pedidosPaginados}
-          keyExtractor={(p) => p.codPedido}
-          onRowClick={(p) => router.push(`/pedidos/${p.codPedido}`)}
-          emptyMessage="Nenhum pedido encontrado."
-          columns={[
-            {
-              header: "#",
-              accessor: (p) => (
-                <span className="font-mono text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded">
-                  #{p.codPedido}
-                </span>
-              ),
-              className: "w-16",
-            },
-            {
-              header: "Cliente",
-              accessor: (p) => (
-                <span className="font-medium text-slate-200">{p.nomeCliente}</span>
-              ),
-            },
-            {
-              header: "CNPJ",
-              accessor: (p) => (
-                <span className="font-mono text-xs text-slate-400">{formatarCnpj(p.cnpjCliente)}</span>
-              ),
-            },
-            {
-              header: "Data",
-              accessor: (p) => formatarData(p.dataPedido),
-            },
-            {
-              header: "Total",
-              accessor: (p) => (
-                <span className="font-semibold text-blue-400">
-                  {formatarMoeda(p.valorTotal)}
-                </span>
-              ),
-            },
-            {
-              header: "",
-              accessor: (p) => (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(`/pedidos/${p.codPedido}`);
-                  }}
-                >
-                  Ver detalhes →
-                </Button>
-              ),
-            },
-          ]}
-        />
-
-        {/* Controles de Paginação */}
-        {totalPaginas > 1 && (
-          <div className="px-5 py-4 border-t border-slate-700 flex items-center justify-between bg-slate-800/50">
-            <div className="text-sm text-slate-400">
-              Mostrando <span className="text-slate-200">{inicio + 1}</span> até <span className="text-slate-200">{Math.min(fim, pedidosFiltrados.length)}</span> de <span className="text-slate-200">{pedidosFiltrados.length}</span> pedidos
-            </div>
-            <div className="flex gap-2">
+        {/* Filtros */}
+        <Card title="🔍 Filtrar pedidos">
+          <div className="flex flex-wrap gap-3 items-end">
+            <Input
+              label="Data inicial"
+              type="date"
+              value={dataInicio}
+              onChange={(e) => setDataInicio(e.target.value)}
+              className="w-44"
+            />
+            <Input
+              label="Data final"
+              type="date"
+              value={dataFim}
+              onChange={(e) => setDataFim(e.target.value)}
+              className="w-44"
+            />
+            <Input
+              label="CNPJ do cliente"
+              placeholder="Digite para filtrar..."
+              mask="cnpj"
+              value={cnpjFiltro}
+              onChange={(e) => setCnpjFiltro(e.target.value)}
+              className="w-56"
+            />
+            {(dataInicio || dataFim || cnpjFiltro) && (
               <Button
+                variant="ghost"
                 size="sm"
-                variant="secondary"
-                disabled={paginaAtual === 1}
-                onClick={() => setPaginaAtual(p => p - 1)}
+                onClick={limparFiltros}
+                className="mb-1 text-blue-400 hover:text-blue-300"
               >
-                Anterior
+                Limpar filtros
               </Button>
-              <div className="flex items-center px-4 text-sm font-medium text-slate-300">
-                Página {paginaAtual} de {totalPaginas}
-              </div>
-              <Button
-                size="sm"
-                variant="secondary"
-                disabled={paginaAtual === totalPaginas}
-                onClick={() => setPaginaAtual(p => p + 1)}
-              >
-                Próxima
-              </Button>
-            </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Erro */}
+        {erro && (
+          <div className="bg-red-900/40 border border-red-700 text-red-400 rounded-lg px-4 py-3 text-sm">
+            {erro}
           </div>
         )}
-      </div>
-    </div>
 
-    {/* Modal */}
-    <Modal
-      open={modalAberto}
-      title="Novo Pedido"
-      onClose={handleFecharModal}
-      footer={
-        <>
-          <Button variant="secondary" onClick={handleFecharModal}>Cancelar</Button>
-          <Button loading={criando} onClick={handleCriarPedido}>Criar Pedido</Button>
-        </>
-      }
-    >
-      <div className="flex flex-col gap-4">
-        <p className="text-sm text-slate-400">
-          Informe o CNPJ do cliente para criar um novo pedido.
-          O cliente deve estar previamente cadastrado no sistema.
-        </p>
-
-        <div className="relative">
-          <Input
-            label="CNPJ do cliente"
-            placeholder="00.000.000/0000-00"
-            mask="cnpj"
-            value={cnpj}
-            onChange={(e) => {
-              setCnpj(e.target.value);
-              setMostrarSugestoes(true);
-              setErroCnpj("");
-            }}
-            onFocus={() => setMostrarSugestoes(true)}
-            onBlur={() => setTimeout(() => setMostrarSugestoes(false), 150)}
-            error={erroCnpj}
-            autoFocus
+        {/* Tabela */}
+        <Card
+          title={loading ? "Carregando..." : `${pedidosFiltrados.length} pedido(s) encontrado(s)`}
+          noPadding
+        >
+          <Table
+            loading={loading}
+            data={pedidosPaginados}
+            keyExtractor={(p) => p.codPedido}
+            onRowClick={(p) => router.push(`/pedidos/${p.codPedido}`)}
+            emptyMessage="Nenhum pedido encontrado."
+            columns={[
+              {
+                header: "#",
+                accessor: (p) => (
+                  <Badge variant="secondary" className="font-mono">
+                    #{p.codPedido}
+                  </Badge>
+                ),
+                className: "w-16",
+              },
+              {
+                header: "Cliente",
+                accessor: (p) => (
+                  <span className="font-medium text-slate-200">{p.nomeCliente}</span>
+                ),
+              },
+              {
+                header: "CNPJ",
+                accessor: (p) => (
+                  <span className="font-mono text-xs text-slate-400">{formatarCnpj(p.cnpjCliente)}</span>
+                ),
+              },
+              {
+                header: "Data",
+                accessor: (p) => formatarData(p.dataPedido),
+              },
+              {
+                header: "Total",
+                accessor: (p) => (
+                  <span className="font-semibold text-blue-400">
+                    {formatarMoeda(p.valorTotal)}
+                  </span>
+                ),
+              },
+              {
+                header: "",
+                accessor: (p) => (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/pedidos/${p.codPedido}`);
+                    }}
+                  >
+                    Ver detalhes →
+                  </Button>
+                ),
+              },
+            ]}
           />
 
-          {/* Dropdown de sugestões */}
-          {mostrarSugestoes && clientesFiltrados.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg shadow-xl overflow-hidden">
-              {clientesFiltrados.map((c) => (
-                <button
-                  key={c.codCliente}
-                  onMouseDown={() => {
-                    setCnpj(c.cnpj);
-                    setMostrarSugestoes(false);
-                    setErroCnpj("");
-                  }}
-                  className="w-full px-4 py-2.5 text-left hover:bg-slate-600 transition-colors"
+          {/* Controles de Paginação */}
+          {totalPaginas > 1 && (
+            <div className="px-5 py-4 border-t border-slate-700 flex items-center justify-between bg-slate-800/50">
+              <div className="text-sm text-slate-400">
+                Mostrando <span className="text-slate-200">{inicio + 1}</span> até <span className="text-slate-200">{Math.min(fim, pedidosFiltrados.length)}</span> de <span className="text-slate-200">{pedidosFiltrados.length}</span> pedidos
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={paginaAtual === 1}
+                  onClick={() => setPaginaAtual(p => p - 1)}
                 >
-                  <p className="text-sm font-medium text-white">{c.nome}</p>
-                  <p className="text-xs text-slate-400 font-mono">{formatarCnpj(c.cnpj)}</p>
-                </button>
-              ))}
+                  Anterior
+                </Button>
+                <div className="flex items-center px-4 text-sm font-medium text-slate-300">
+                  Página {paginaAtual} de {totalPaginas}
+                </div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={paginaAtual === totalPaginas}
+                  onClick={() => setPaginaAtual(p => p + 1)}
+                >
+                  Próxima
+                </Button>
+              </div>
             </div>
           )}
-        </div>
+        </Card>
       </div>
-    </Modal>
-  </>
-);
+
+      {/* Modal */}
+      <Modal
+        open={modalAberto}
+        title="Novo Pedido"
+        onClose={handleFecharModal}
+        footer={
+          <>
+            <Button variant="secondary" onClick={handleFecharModal}>Cancelar</Button>
+            <Button loading={criando} onClick={handleCriarPedido}>Criar Pedido</Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-slate-400">
+            Informe o CNPJ do cliente para criar um novo pedido.
+            O cliente deve estar previamente cadastrado no sistema.
+          </p>
+
+          <div className="relative">
+            <Input
+              label="CNPJ do cliente"
+              placeholder="00.000.000/0000-00"
+              mask="cnpj"
+              value={cnpj}
+              onChange={(e) => {
+                setCnpj(e.target.value);
+                setMostrarSugestoes(true);
+                setErroCnpj("");
+              }}
+              onFocus={() => setMostrarSugestoes(true)}
+              onBlur={() => setTimeout(() => setMostrarSugestoes(false), 150)}
+              error={erroCnpj}
+              autoFocus
+            />
+
+            {/* Dropdown de sugestões */}
+            {mostrarSugestoes && clientesFiltrados.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg shadow-xl overflow-hidden">
+                {clientesFiltrados.map((c) => (
+                  <button
+                    key={c.codCliente}
+                    onMouseDown={() => {
+                      setCnpj(c.cnpj);
+                      setMostrarSugestoes(false);
+                      setErroCnpj("");
+                    }}
+                    className="w-full px-4 py-2.5 text-left hover:bg-slate-600 transition-colors"
+                  >
+                    <p className="text-sm font-medium text-white">{c.nome}</p>
+                    <p className="text-xs text-slate-400 font-mono">{formatarCnpj(c.cnpj)}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
+    </>
+  );
 }

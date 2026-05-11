@@ -2,10 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Header } from "@/components/layout/Header";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
-import { Table } from "@/components/ui/Table";
+import { Button, Input, Modal, Table, Badge, Card } from "@/components/ui";
 import { produtoService } from "@/services/produto-service";
 import { ProdutoResponse } from "@/types";
 import { formatarMoeda } from "@/utils/format";
@@ -181,13 +178,10 @@ export default function ProdutosPage() {
                     </div>
                 )}
 
-                <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-                    <div className="px-5 py-4 border-b border-slate-700">
-                        <p className="text-sm font-semibold text-slate-300">
-                            {loading ? "Carregando..." : `${produtos.length} produto(s) encontrado(s)`}
-                        </p>
-                    </div>
-
+                <Card
+                    title={loading ? "Carregando..." : `${produtos.length} produto(s) encontrado(s)`}
+                    noPadding
+                >
                     <Table
                         loading={loading}
                         data={produtosPaginados}
@@ -197,9 +191,9 @@ export default function ProdutosPage() {
                             {
                                 header: "#",
                                 accessor: (p) => (
-                                    <span className="font-mono text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded">
+                                    <Badge variant="secondary" className="font-mono">
                                         #{p.codProduto}
-                                    </span>
+                                    </Badge>
                                 ),
                                 className: "w-16",
                             },
@@ -211,18 +205,14 @@ export default function ProdutosPage() {
                             },
                             {
                                 header: "Preço",
-                                accessor: (p) => (
-                                    <span className="text-slate-300">{formatarMoeda(p.preco)}</span>
-                                ),
+                                accessor: (p) => formatarMoeda(p.preco),
                             },
                             {
                                 header: "Estoque",
                                 accessor: (p) => (
-                                    <div className="flex items-center gap-2">
-                                        <span className={`font-semibold ${p.estoque <= 5 ? "text-red-400" : "text-blue-400"}`}>
-                                            {p.estoque} un.
-                                        </span>
-                                    </div>
+                                    <Badge variant={p.estoque === 0 ? "danger" : p.estoque <= 5 ? "warning" : "secondary"}>
+                                        {p.estoque} un.
+                                    </Badge>
                                 ),
                             },
                             {
@@ -233,19 +223,17 @@ export default function ProdutosPage() {
                                             size="sm"
                                             variant="ghost"
                                             onClick={() => handleAbrirEdicao(p)}
-                                            title="Editar Produto"
                                         >
                                             ✏️
                                         </Button>
                                         <Button
                                             size="sm"
                                             variant="ghost"
-                                            className="hover:bg-red-900/20 text-red-400"
+                                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
                                             onClick={() => {
                                                 setProdutoSelecionado(p);
                                                 setModalExcluirAberto(true);
                                             }}
-                                            title="Excluir Produto"
                                         >
                                             🗑️
                                         </Button>
@@ -285,7 +273,7 @@ export default function ProdutosPage() {
                             </div>
                         </div>
                     )}
-                </div>
+                </Card>
             </div>
 
             {/* Modal Novo Produto */}

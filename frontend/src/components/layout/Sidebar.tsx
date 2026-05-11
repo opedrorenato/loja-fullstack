@@ -15,13 +15,13 @@ export function Sidebar() {
     return (
         <aside className="w-56 min-h-screen bg-gray-900 text-white flex flex-col">
             {/* Logo */}
-            <div className="px-6 py-5 border-b border-gray-700">
-                <h1 className="text-lg font-bold tracking-tight">🏪 Loja FullStack</h1>
-                <p className="text-xs text-gray-400 mt-0.5">Sistema de Vendas</p>
+            <div className="px-6 py-6 border-b border-slate-700">
+                <h1 className="text-xl font-semibold text-white tracking-tight">🏪 Loja FullStack</h1>
+                <p className="text-sm text-slate-400 mt-0.5">Sistema de Vendas</p>
             </div>
 
             {/* Nav */}
-            <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
+            <nav className="flex-1 px-3 py-6 flex flex-col gap-1">
                 {navItems.map((item) => {
                     const active =
                         item.href === "/"

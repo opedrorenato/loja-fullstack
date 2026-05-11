@@ -12,8 +12,8 @@ public class ProdutoRequestDtoValidator : AbstractValidator<ProdutoRequestDto>
                 .WithMessage("Deve ser informado um Preço válido");
 
         RuleFor(x => x.Estoque)
-            .GreaterThan(0)
-                .WithMessage("Deve ser informada um valor positivo")
+            .GreaterThanOrEqualTo(0)
+                .WithMessage("Deve ser informada um valor positivo ou zero")
             .Must(e => e == Math.Truncate((decimal)e))
                 .WithMessage("Estoque deve ser um número inteiro");
     }

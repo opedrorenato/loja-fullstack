@@ -60,19 +60,31 @@ public class ProdutoController : ControllerBase
     }
 
     /// <summary>
-    /// Atualiza o estoque de um produto
+    /// Atualiza os dados de um produto
     /// </summary>
-    [HttpPatch("{id}/estoque")]
-    public async Task<IActionResult> UpdateEstoque(int id, [FromBody] int novoEstoque)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, ProdutoRequestDto dto)
     {
-        await _produtoService.UpdateEstoqueAsync(id, novoEstoque);
-        return NoContent();
+        try
+        {
+            await _produtoService.UpdateAsync(id, dto);
+            return NoContent();
+        }
+        catch (ValidationException ex)
+        {
+            var errors = ex.Errors.Select(e => e.ErrorMessage);
+            return BadRequest(new { Errors = errors });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 
     /// <summary>
     /// Remove o produto com o ID especificado
     /// </summary>
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
         await _produtoService.DeleteAsync(id);

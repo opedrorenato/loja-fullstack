@@ -14,6 +14,7 @@ export default function ProdutosPage() {
     const [produtos, setProdutos] = useState<ProdutoResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [erro, setErro] = useState("");
+    const [sucesso, setSucesso] = useState("");
 
     // Modal Novo Produto
     const [modalNovoAberto, setModalNovoAberto] = useState(false);
@@ -22,11 +23,14 @@ export default function ProdutosPage() {
     const [estoque, setEstoque] = useState("");
     const [criando, setCriando] = useState(false);
 
-    // Modal Editar Estoque
+    // Modal Editar Produto
     const [modalEditarAberto, setModalEditarAberto] = useState(false);
     const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoResponse | null>(null);
-    const [novoEstoque, setNovoEstoque] = useState("");
     const [atualizando, setAtualizando] = useState(false);
+
+    // Modal Excluir Produto
+    const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
+    const [excluindo, setExcluindo] = useState(false);
 
     const carregarProdutos = useCallback(async () => {
         setLoading(true);
@@ -50,9 +54,10 @@ export default function ProdutosPage() {
 
         setCriando(true);
         try {
+            const precoNumerico = Number(preco.replace(/\D/g, "")) / 100;
             await produtoService.create({
                 nome,
-                preco: Number(preco),
+                preco: precoNumerico,
                 estoque: Number(estoque)
             });
             setModalNovoAberto(false);
@@ -67,20 +72,52 @@ export default function ProdutosPage() {
         }
     }
 
-    async function handleAtualizarEstoque() {
-        if (!produtoSelecionado || !novoEstoque) return;
+    function handleAbrirEdicao(produto: ProdutoResponse) {
+        setProdutoSelecionado(produto);
+        setNome(produto.nome);
+        setPreco((produto.preco * 100).toFixed(0));
+        setEstoque(produto.estoque.toString());
+        setModalEditarAberto(true);
+    }
+
+    async function handleEditarProduto() {
+        if (!produtoSelecionado || !nome || !preco || !estoque) return;
 
         setAtualizando(true);
+        setErro("");
         try {
-            await produtoService.updateEstoque(produtoSelecionado.codProduto, Number(novoEstoque));
+            const precoNumerico = Number(preco.replace(/\D/g, "")) / 100;
+            await produtoService.update(produtoSelecionado.codProduto, {
+                nome,
+                preco: precoNumerico,
+                estoque: Number(estoque)
+            });
             setModalEditarAberto(false);
-            setProdutoSelecionado(null);
-            setNovoEstoque("");
+            setSucesso("Produto atualizado com sucesso!");
+            setTimeout(() => setSucesso(""), 3000);
             carregarProdutos();
         } catch {
-            setErro("Erro ao atualizar estoque.");
+            setErro("Erro ao atualizar produto.");
         } finally {
             setAtualizando(false);
+        }
+    }
+
+    async function handleDeletarProduto() {
+        if (!produtoSelecionado) return;
+
+        setExcluindo(true);
+        setErro("");
+        try {
+            await produtoService.delete(produtoSelecionado.codProduto);
+            setModalExcluirAberto(false);
+            setSucesso("Produto removido com sucesso!");
+            setTimeout(() => setSucesso(""), 3000);
+            carregarProdutos();
+        } catch {
+            setErro("Erro ao excluir produto.");
+        } finally {
+            setExcluindo(false);
         }
     }
 
@@ -98,6 +135,12 @@ export default function ProdutosPage() {
                 {erro && (
                     <div className="bg-red-900/40 border border-red-700 text-red-400 rounded-lg px-4 py-3 text-sm">
                         {erro}
+                    </div>
+                )}
+
+                {sucesso && (
+                    <div className="bg-emerald-900/40 border border-emerald-700 text-emerald-400 rounded-lg px-4 py-3 text-sm">
+                        ✅ {sucesso}
                     </div>
                 )}
 
@@ -148,17 +191,28 @@ export default function ProdutosPage() {
                             {
                                 header: "Ações",
                                 accessor: (p) => (
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => {
-                                            setProdutoSelecionado(p);
-                                            setNovoEstoque(p.estoque.toString());
-                                            setModalEditarAberto(true);
-                                        }}
-                                    >
-                                        ✏️ Editar Estoque
-                                    </Button>
+                                    <div className="flex justify-end gap-2">
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleAbrirEdicao(p)}
+                                            title="Editar Produto"
+                                        >
+                                            ✏️
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="hover:bg-red-900/20 text-red-400"
+                                            onClick={() => {
+                                                setProdutoSelecionado(p);
+                                                setModalExcluirAberto(true);
+                                            }}
+                                            title="Excluir Produto"
+                                        >
+                                            🗑️
+                                        </Button>
+                                    </div>
                                 ),
                                 className: "text-right",
                             },
@@ -188,9 +242,9 @@ export default function ProdutosPage() {
                     />
                     <div className="grid grid-cols-2 gap-4">
                         <Input
-                            label="Preço (R$)"
-                            type="number"
-                            placeholder="0.00"
+                            label="Preço"
+                            placeholder="R$ 0,00"
+                            mask="currency"
                             value={preco}
                             onChange={(e) => setPreco(e.target.value)}
                         />
@@ -205,30 +259,69 @@ export default function ProdutosPage() {
                 </div>
             </Modal>
 
-            {/* Modal Editar Estoque */}
+            {/* Modal Editar Produto */}
             <Modal
                 open={modalEditarAberto}
-                title="Editar Estoque"
+                title="Editar Produto"
                 onClose={() => setModalEditarAberto(false)}
                 footer={
                     <>
                         <Button variant="secondary" onClick={() => setModalEditarAberto(false)}>Cancelar</Button>
-                        <Button loading={atualizando} onClick={handleAtualizarEstoque}>Atualizar Estoque</Button>
+                        <Button loading={atualizando} onClick={handleEditarProduto}>Salvar Alterações</Button>
+                    </>
+                }
+            >
+                <div className="flex flex-col gap-4">
+                    <Input
+                        label="Nome do Produto"
+                        value={nome}
+                        onChange={(e) => setNome(e.target.value)}
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                        <Input
+                            label="Preço"
+                            mask="currency"
+                            value={preco}
+                            onChange={(e) => setPreco(e.target.value)}
+                        />
+                        <Input
+                            label="Quantidade em Estoque"
+                            type="number"
+                            value={estoque}
+                            onChange={(e) => setEstoque(e.target.value)}
+                        />
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Modal Excluir Produto */}
+            <Modal
+                open={modalExcluirAberto}
+                title="Excluir Produto"
+                onClose={() => setModalExcluirAberto(false)}
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => setModalExcluirAberto(false)}>Cancelar</Button>
+                        <Button
+                            variant="danger"
+                            loading={excluindo}
+                            onClick={handleDeletarProduto}
+                        >
+                            Excluir Produto
+                        </Button>
                     </>
                 }
             >
                 {produtoSelecionado && (
-                    <div className="flex flex-col gap-4">
-                        <p className="text-sm text-slate-400">
-                            Atualizando o estoque do produto: <span className="text-white font-medium">{produtoSelecionado.nome}</span>
+                    <div className="flex flex-col gap-3">
+                        <p className="text-white">
+                            Tem certeza que deseja excluir o produto <span className="font-bold text-blue-400">{produtoSelecionado.nome}</span>?
                         </p>
-                        <Input
-                            label="Nova Quantidade em Estoque"
-                            type="number"
-                            value={novoEstoque}
-                            onChange={(e) => setNovoEstoque(e.target.value)}
-                            autoFocus
-                        />
+                        <div className="bg-red-900/20 border border-red-900/50 p-4 rounded-lg">
+                            <p className="text-xs text-red-400 leading-relaxed">
+                                ⚠️ <strong>Atenção:</strong> Esta ação é irreversível. Ao excluir o produto, todos os itens de pedidos vinculados a ele também serão removidos para manter a integridade do sistema.
+                            </p>
+                        </div>
                     </div>
                 )}
             </Modal>

@@ -11,8 +11,8 @@ export const produtoService = {
     create: (data: ProdutoRequest) =>
         api.post<ProdutoResponse>("/api/Produto", data),
 
-    updateEstoque: (id: number, estoque: number) =>
-        api.patch(`/api/Produto/${id}/estoque`, estoque),
+    update: (id: number, data: ProdutoRequest) =>
+        api.put(`/api/Produto/${id}`, data),
 
     delete: (id: number) =>
         api.delete(`/api/Produto/${id}`),

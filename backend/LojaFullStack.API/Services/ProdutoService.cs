@@ -57,6 +57,24 @@ public class ProdutoService : IProdutoService
         await _produtoRepository.UpdateEstoqueAsync(id, novoEstoque);
     }
 
+    public async Task UpdateAsync(int id, ProdutoRequestDto dto)
+    {
+        // Validar Produto
+        var validationResult = await _validator.ValidateAsync(dto);
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+
+        var produto = await _produtoRepository.GetByIdAsync(id);
+        if (produto is null)
+            throw new InvalidOperationException("Produto não encontrado.");
+
+        produto.Nome = dto.Nome;
+        produto.Preco = dto.Preco;
+        produto.Estoque = dto.Estoque;
+
+        await _produtoRepository.UpdateAsync(produto);
+    }
+
     public async Task DeleteAsync(int codProduto)
     {
         await _produtoRepository.DeleteAsync(codProduto);

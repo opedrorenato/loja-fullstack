@@ -1,4 +1,4 @@
-﻿using LojaFullStack.API.Models;
+using LojaFullStack.API.Models;
 
 namespace LojaFullStack.API.Repositories.Interfaces;
 
@@ -8,5 +8,6 @@ public interface IProdutoRepository
     Task<Produto?> GetByIdAsync(int id);
     Task<int> CreateAsync(Produto produto);
     Task UpdateEstoqueAsync(int codProduto, int novoEstoque);
+    Task UpdateAsync(Produto produto);
     Task DeleteAsync(int codProduto);
 }

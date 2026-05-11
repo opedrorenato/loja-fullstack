@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using LojaFullStack.API.Infrastructure;
 using LojaFullStack.API.Models;
 using LojaFullStack.API.Repositories.Interfaces;
@@ -54,11 +54,36 @@ public class ProdutoRepository : IProdutoRepository
             new { Estoque = novoEstoque, Id = codProduto });
     }
 
+    public async Task UpdateAsync(Produto produto)
+    {
+        using var conn = _factory.CreateConnection();
+        var query = @"UPDATE Produto SET Nome = @Nome, Preco = @Preco, Estoque = @Estoque WHERE CodProduto = @CodProduto";
+
+        await conn.ExecuteAsync(query, produto);
+    }
+
     public async Task DeleteAsync(int codProduto)
     {
         using var conn = _factory.CreateConnection();
-        var query = @$"DELETE FROM Produto WHERE CodProduto = @Id";
+        await conn.OpenAsync();
+        using var transaction = await conn.BeginTransactionAsync();
 
-        await conn.ExecuteAsync(query, new { Id = codProduto });
+        try
+        {
+            // 1. Deletar itens de pedidos que contém este produto
+            var queryItens = "DELETE FROM ItensPedido WHERE CodProduto = @Id";
+            await conn.ExecuteAsync(queryItens, new { Id = codProduto }, transaction);
+
+            // 2. Deletar o produto
+            var queryProduto = "DELETE FROM Produto WHERE CodProduto = @Id";
+            await conn.ExecuteAsync(queryProduto, new { Id = codProduto }, transaction);
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 }

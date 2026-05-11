@@ -27,7 +27,9 @@ function applyMask(value: string, mask?: "cnpj" | "currency"): string {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-    ({ label, error, mask, onChange, className = "", ...props }, ref) => {
+    ({ label, error, mask, onChange, value, className = "", ...props }, ref) => {
+        const maskedValue = mask && typeof value === "string" ? applyMask(value, mask) : value;
+
         function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
             if (mask) e.target.value = applyMask(e.target.value, mask);
             onChange?.(e);
@@ -40,6 +42,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 )}
                 <input
                     ref={ref}
+                    value={maskedValue}
                     onChange={handleChange}
                     className={`
             w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors

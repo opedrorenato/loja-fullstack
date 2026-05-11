@@ -98,7 +98,7 @@ public class PedidoRepository : IPedidoRepository
     public async Task AddItemAsync(int codPedido, ItensPedido item)
     {
         using var conn = _factory.CreateConnection();
-        var query = @$"
+        var query = @"
             INSERT INTO ItensPedido (CodPedido, CodProduto, Quantidade, PrecoUnitario)
             VALUES (@CodPedido, @CodProduto, @Quantidade, @PrecoUnitario)
         ";
@@ -106,9 +106,9 @@ public class PedidoRepository : IPedidoRepository
         await conn.ExecuteAsync(query, new
         {
             CodPedido = codPedido,
-            item.CodProduto,
-            item.Quantidade,
-            item.PrecoUnitario
+            CodProduto = item.CodProduto,
+            Quantidade = item.Quantidade,
+            PrecoUnitario = item.PrecoUnitario
         });
     }
 

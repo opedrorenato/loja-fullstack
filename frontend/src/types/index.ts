@@ -45,6 +45,7 @@ export interface ItensPedidoResponse {
 // Pedido
 export interface PedidoRequest {
     cnpj: string;
+    itens: ItensPedidoRequest[];
 }
 
 export interface PedidoResponse {

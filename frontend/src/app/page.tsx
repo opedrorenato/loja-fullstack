@@ -26,7 +26,7 @@ export default function PedidosPage() {
   const [modalAberto, setModalAberto] = useState(false);
   const [cnpj, setCnpj] = useState("");
   const [erroCnpj, setErroCnpj] = useState("");
-  const [criando, setCriando] = useState(false);
+  const [criando, setCriando] = useState(false); // TO-DO: REMOVER?
 
   const [clientes, setClientes] = useState<ClienteResponse[]>([]);
   const [clientesFiltrados, setClientesFiltrados] = useState<ClienteResponse[]>([]);
@@ -102,18 +102,9 @@ export default function PedidosPage() {
       return;
     }
 
-    setCriando(true);
-    setErroCnpj("");
-    try {
-      const pedido = await pedidoService.create({ cnpj: clienteEncontrado.cnpj });
-      setModalAberto(false);
-      setCnpj("");
-      router.push(`/novo-pedido?pedidoId=${pedido.codPedido}`);
-    } catch (e: unknown) {
-      if (e instanceof Error) setErroCnpj(e.message);
-    } finally {
-      setCriando(false);
-    }
+    setModalAberto(false);
+    setCnpj("");
+    router.push(`/novo-pedido?cnpj=${encodeURIComponent(clienteEncontrado.cnpj)}`);
   }
 
   function handleFecharModal() {

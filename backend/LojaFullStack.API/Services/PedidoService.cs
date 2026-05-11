@@ -35,14 +35,48 @@ public class PedidoService : IPedidoService
 
     public async Task<PedidoResponseDto> CreateAsync(PedidoRequestDto dto)
     {
+        if (dto.Itens is null || dto.Itens.Count == 0)
+            throw new InvalidOperationException("O pedido deve conter pelo menos um item.");
+
         // Busca cliente pelo CNPJ informado
         var cliente = await _clienteRepository.GetByCNPJAsync(dto.CNPJ);
         if (cliente is null)
             throw new KeyNotFoundException("Nenhum cliente encontrado com esse CNPJ.");
 
+        var produtos = new List<(ItensPedidoRequestDto Item, Produto Produto)>();
+        foreach (var itemDto in dto.Itens)
+        {
+            var produto = await _produtoRepository.GetByIdAsync(itemDto.CodProduto);
+
+            if (produto is null)
+                throw new KeyNotFoundException($"Produto {itemDto.CodProduto} não encontrado.");
+
+            // Validar Estoque disponível para cada item
+            if (produto.Estoque < itemDto.Quantidade)
+                throw new InvalidOperationException(
+                    $"Estoque insuficiente para '{produto.Nome}'. Disponível: {produto.Estoque} unidades.");
+
+            produtos.Add((itemDto, produto));
+        }
+
         var codPedido = await _pedidoRepository.CreateAsync(cliente.CodCliente);
-        var pedido = await _pedidoRepository.GetByIdAsync(codPedido);
-        return pedido!;
+
+        foreach (var (itemDto, produto) in produtos)
+        {
+            var item = new ItensPedido
+            {
+                CodProduto = itemDto.CodProduto,
+                Quantidade = itemDto.Quantidade,
+                PrecoUnitario = produto!.Preco
+            };
+
+            await _pedidoRepository.AddItemAsync(codPedido, item);
+            await _produtoRepository.UpdateEstoqueAsync(produto.CodProduto, produto.Estoque - itemDto.Quantidade);
+        }
+
+        await _pedidoRepository.UpdateValorTotalAsync(codPedido);
+        var result = (await _pedidoRepository.GetByIdAsync(codPedido))!;
+        return result;
     }
 
     public async Task<PedidoResponseDto> AddItemAsync(int codPedido, ItensPedidoRequestDto dto)

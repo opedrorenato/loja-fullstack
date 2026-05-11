@@ -3,6 +3,7 @@
 public class PedidoRequestDto
 {
     public string CNPJ { get; set; } = null!;
+    public List<ItensPedidoRequestDto> Itens { get; set; } = new();
 }
 
 public class PedidoResponseDto

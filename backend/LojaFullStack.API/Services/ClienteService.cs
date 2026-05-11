@@ -1,5 +1,6 @@
 using FluentValidation;
 using LojaFullStack.API.DTOs;
+using LojaFullStack.API.Infrastructure;
 using LojaFullStack.API.Models;
 using LojaFullStack.API.Repositories.Interfaces;
 using LojaFullStack.API.Services.Interfaces;
@@ -12,7 +13,7 @@ public class ClienteService : IClienteService
     private readonly IValidator<ClienteRequestDto> _validator;
 
     public ClienteService(
-        IClienteRepository clienteRepository, 
+        IClienteRepository clienteRepository,
         IValidator<ClienteRequestDto> validator
     )
     {
@@ -40,7 +41,8 @@ public class ClienteService : IClienteService
 
     public async Task<ClienteResponseDto?> GetByCNPJAsync(string cnpj)
     {
-        var cliente = await _clienteRepository.GetByCNPJAsync(cnpj);
+        var cnpjLimpo = Utils.LimparCnpj(cnpj);
+        var cliente = await _clienteRepository.GetByCNPJAsync(cnpjLimpo);
 
         if (cliente is null)
             return null;
@@ -51,6 +53,9 @@ public class ClienteService : IClienteService
 
     public async Task<ClienteResponseDto> CreateAsync(ClienteRequestDto dto)
     {
+        // Padronizar CNPJ (apenas números)
+        dto.CNPJ = Utils.LimparCnpj(dto.CNPJ);
+
         // Validar Cliente
         var validationResult = await _validator.ValidateAsync(dto);
         if (!validationResult.IsValid)

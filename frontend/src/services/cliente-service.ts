@@ -8,8 +8,10 @@ export const clienteService = {
     getById: (id: number) =>
         api.get<ClienteResponse>(`/api/Cliente/id/${id}`),
 
-    getByCnpj: (cnpj: string) =>
-        api.get<ClienteResponse>(`/api/Cliente/cnpj/${encodeURIComponent(cnpj)}`),
+    getByCnpj: (cnpj: string) => {
+        const cnpjLimpo = cnpj.replace(/\D/g, "");
+        return api.get<ClienteResponse>(`/api/Cliente/cnpj/${encodeURIComponent(cnpjLimpo)}`);
+    },
 
     create: (data: ClienteRequest) =>
         api.post<ClienteResponse>("/api/Cliente", data),

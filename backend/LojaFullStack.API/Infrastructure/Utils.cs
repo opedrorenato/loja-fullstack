@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
 namespace LojaFullStack.API.Infrastructure;
 
@@ -12,6 +12,8 @@ public static partial class Utils
         var digits = ValidCnpjRegex().Replace(cnpj, "");
         return digits.Length == 14;
     }
+
+    public static string LimparCnpj(string cnpj) => ValidCnpjRegex().Replace(cnpj, "");
 
     [GeneratedRegex("\\D")]
     private static partial Regex ValidCnpjRegex();

@@ -77,6 +77,10 @@ public class ProdutoService : IProdutoService
 
     public async Task DeleteAsync(int codProduto)
     {
+        var hasItems = await _produtoRepository.HasItemsAsync(codProduto);
+        if (hasItems)
+            throw new InvalidOperationException("Não é possível excluir o produto pois ele possui pedidos vinculados.");
+
         await _produtoRepository.DeleteAsync(codProduto);
     }
 

@@ -9,5 +9,6 @@ public interface IProdutoRepository
     Task<int> CreateAsync(Produto produto);
     Task UpdateEstoqueAsync(int codProduto, int novoEstoque);
     Task UpdateAsync(Produto produto);
+    Task<bool> HasItemsAsync(int codProduto);
     Task DeleteAsync(int codProduto);
 }

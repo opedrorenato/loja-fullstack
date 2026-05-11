@@ -87,7 +87,14 @@ public class ProdutoController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        await _produtoService.DeleteAsync(id);
-        return NoContent();
+        try
+        {
+            await _produtoService.DeleteAsync(id);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
 }

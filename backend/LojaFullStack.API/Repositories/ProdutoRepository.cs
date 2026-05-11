@@ -62,28 +62,19 @@ public class ProdutoRepository : IProdutoRepository
         await conn.ExecuteAsync(query, produto);
     }
 
+    public async Task<bool> HasItemsAsync(int codProduto)
+    {
+        using var conn = _factory.CreateConnection();
+        var query = "SELECT COUNT(1) FROM ItensPedido WHERE CodProduto = @Id";
+
+        var count = await conn.ExecuteScalarAsync<int>(query, new { Id = codProduto });
+        return count > 0;
+    }
+
     public async Task DeleteAsync(int codProduto)
     {
         using var conn = _factory.CreateConnection();
-        await conn.OpenAsync();
-        using var transaction = await conn.BeginTransactionAsync();
-
-        try
-        {
-            // 1. Deletar itens de pedidos que contém este produto
-            var queryItens = "DELETE FROM ItensPedido WHERE CodProduto = @Id";
-            await conn.ExecuteAsync(queryItens, new { Id = codProduto }, transaction);
-
-            // 2. Deletar o produto
-            var queryProduto = "DELETE FROM Produto WHERE CodProduto = @Id";
-            await conn.ExecuteAsync(queryProduto, new { Id = codProduto }, transaction);
-
-            await transaction.CommitAsync();
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
+        var query = "DELETE FROM Produto WHERE CodProduto = @Id";
+        await conn.ExecuteAsync(query, new { Id = codProduto });
     }
 }

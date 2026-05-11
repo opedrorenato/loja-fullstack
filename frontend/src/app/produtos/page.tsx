@@ -65,8 +65,8 @@ export default function ProdutosPage() {
             setPreco("");
             setEstoque("");
             carregarProdutos();
-        } catch {
-            setErro("Erro ao criar produto.");
+        } catch (error: any) {
+            setErro(error.message || "Erro ao criar produto.");
         } finally {
             setCriando(false);
         }
@@ -96,8 +96,9 @@ export default function ProdutosPage() {
             setSucesso("Produto atualizado com sucesso!");
             setTimeout(() => setSucesso(""), 3000);
             carregarProdutos();
-        } catch {
-            setErro("Erro ao atualizar produto.");
+        } catch (error: any) {
+            setErro(error.message || "Erro ao atualizar produto.");
+            setModalEditarAberto(false);
         } finally {
             setAtualizando(false);
         }
@@ -114,8 +115,9 @@ export default function ProdutosPage() {
             setSucesso("Produto removido com sucesso!");
             setTimeout(() => setSucesso(""), 3000);
             carregarProdutos();
-        } catch {
-            setErro("Erro ao excluir produto.");
+        } catch (error: any) {
+            setErro(error.message || "Erro ao excluir produto.");
+            setModalExcluirAberto(false);
         } finally {
             setExcluindo(false);
         }
@@ -317,9 +319,9 @@ export default function ProdutosPage() {
                         <p className="text-white">
                             Tem certeza que deseja excluir o produto <span className="font-bold text-blue-400">{produtoSelecionado.nome}</span>?
                         </p>
-                        <div className="bg-red-900/20 border border-red-900/50 p-4 rounded-lg">
-                            <p className="text-xs text-red-400 leading-relaxed">
-                                ⚠️ <strong>Atenção:</strong> Esta ação é irreversível. Ao excluir o produto, todos os itens de pedidos vinculados a ele também serão removidos para manter a integridade do sistema.
+                        <div className="bg-amber-900/20 border border-amber-900/50 p-4 rounded-lg">
+                            <p className="text-xs text-amber-400 leading-relaxed">
+                                ⚠️ <strong>Atenção:</strong> Por questões de integridade, o sistema não permite a exclusão de produtos que possuam pedidos vinculados.
                             </p>
                         </div>
                     </div>

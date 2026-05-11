@@ -1,8 +1,11 @@
+using FluentValidation;
+using LojaFullStack.API.DTOs;
 using LojaFullStack.API.Infrastructure;
 using LojaFullStack.API.Repositories;
 using LojaFullStack.API.Repositories.Interfaces;
 using LojaFullStack.API.Services;
 using LojaFullStack.API.Services.Interfaces;
+using LojaFullStack.API.Validators;
 using Microsoft.OpenApi;
 using System.Reflection;
 
@@ -19,6 +22,12 @@ builder.Services.AddSingleton<DbConnectionFactory>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
+
+// Validators
+builder.Services.AddScoped<IValidator<ClienteRequestDto>, ClienteRequestDtoValidator>();
+builder.Services.AddScoped<IValidator<ItensPedidoRequestDto>, ItensPedidoRequestDtoValidator>();
+builder.Services.AddScoped<IValidator<PedidoRequestDto>, PedidoRequestDtoValidator>();
+builder.Services.AddScoped<IValidator<ProdutoRequestDto>, ProdutoRequestDtoValidator>();
 
 // Repositories
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
@@ -45,7 +54,7 @@ builder.Services.AddSwaggerGen(c =>
             - Um produto só pode ser adicionado ao pedido se houver estoque disponível
             - O valor total do pedido é atualizado automaticamente a cada alteração
             - O estoque é decrementado ao adicionar um item e devolvido ao remover
-            """
+        """
     });
 
     // Habilita comentários XML

@@ -1,6 +1,7 @@
 ﻿using LojaFullStack.API.DTOs;
-using LojaFullStack.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using FluentValidation;
+using LojaFullStack.API.Services.Interfaces;
 
 namespace LojaFullStack.API.Controllers;
 
@@ -54,6 +55,11 @@ public class PedidoController : ControllerBase
             var result = CreatedAtAction(nameof(GetById), new { id = pedido.CodPedido }, pedido);
             return result;
         }
+        catch (ValidationException ex)
+        {
+            var errors = ex.Errors.Select(e => e.ErrorMessage);
+            return BadRequest(new { Errors = errors });
+        }
         catch (KeyNotFoundException ex)
         {
             return NotFound(ex.Message);
@@ -70,6 +76,11 @@ public class PedidoController : ControllerBase
         {
             var pedido = await _pedidoService.AddItemAsync(id, dto);
             return Ok(pedido);
+        }
+        catch (ValidationException ex)
+        {
+            var errors = ex.Errors.Select(e => e.ErrorMessage);
+            return BadRequest(new { Errors = errors });
         }
         catch (KeyNotFoundException ex)
         {

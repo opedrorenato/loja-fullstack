@@ -1,3 +1,4 @@
+using FluentValidation;
 using LojaFullStack.API.DTOs;
 using LojaFullStack.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -45,9 +46,17 @@ public class ProdutoController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(ProdutoRequestDto dto)
     {
-        var produto = await _produtoService.CreateAsync(dto);
-        var result = CreatedAtAction(nameof(GetById), new { id = produto.CodProduto }, produto);
-        return result;
+        try
+        {
+            var produto = await _produtoService.CreateAsync(dto);
+            var result = CreatedAtAction(nameof(GetById), new { id = produto.CodProduto }, produto);
+            return result;
+        }
+        catch (ValidationException ex)
+        {
+            var errors = ex.Errors.Select(e => e.ErrorMessage);
+            return BadRequest(new { Errors = errors });
+        }
     }
 
     /// <summary>

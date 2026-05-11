@@ -1,3 +1,4 @@
+using FluentValidation;
 using LojaFullStack.API.DTOs;
 using LojaFullStack.API.Models;
 using LojaFullStack.API.Repositories.Interfaces;
@@ -8,10 +9,15 @@ namespace LojaFullStack.API.Services;
 public class ClienteService : IClienteService
 {
     private readonly IClienteRepository _clienteRepository;
+    private readonly IValidator<ClienteRequestDto> _validator;
 
-    public ClienteService(IClienteRepository clienteRepository)
+    public ClienteService(
+        IClienteRepository clienteRepository, 
+        IValidator<ClienteRequestDto> validator
+    )
     {
         _clienteRepository = clienteRepository;
+        _validator = validator;
     }
 
     public async Task<IEnumerable<ClienteResponseDto>> GetAllAsync()
@@ -45,20 +51,21 @@ public class ClienteService : IClienteService
 
     public async Task<ClienteResponseDto> CreateAsync(ClienteRequestDto dto)
     {
+        // Validar Cliente
+        var validationResult = await _validator.ValidateAsync(dto);
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+
         // Verificar se CNPJ já está cadastrado
         var existente = await _clienteRepository.GetByCNPJAsync(dto.CNPJ);
         if (existente is not null)
             throw new InvalidOperationException("Já existe um cliente cadastrado com esse CNPJ.");
 
-        var cliente = new Cliente
-        {
-            CNPJ = dto.CNPJ,
-            Nome = dto.Nome,
-            Email = dto.Email
-        };
+        var cliente = new Cliente(dto.CNPJ, dto.Nome, dto.Email);
 
         var id = await _clienteRepository.CreateAsync(cliente);
         var criado = await _clienteRepository.GetByIdAsync(id);
+
         return ToResponseDto(criado!);
     }
 

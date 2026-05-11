@@ -1,3 +1,4 @@
+using FluentValidation;
 using LojaFullStack.API.DTOs;
 using LojaFullStack.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -63,6 +64,11 @@ public class ClienteController : ControllerBase
         {
             var cliente = await _clienteService.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = cliente.CodCliente }, cliente);
+        }
+        catch (ValidationException ex)
+        {
+            var errors = ex.Errors.Select(e => e.ErrorMessage);
+            return BadRequest(new { Errors = errors });
         }
         catch (InvalidOperationException ex)
         {

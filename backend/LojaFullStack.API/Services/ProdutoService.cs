@@ -1,3 +1,4 @@
+using FluentValidation;
 using LojaFullStack.API.DTOs;
 using LojaFullStack.API.Models;
 using LojaFullStack.API.Repositories.Interfaces;
@@ -8,10 +9,15 @@ namespace LojaFullStack.API.Services;
 public class ProdutoService : IProdutoService
 {
     private readonly IProdutoRepository _produtoRepository;
+    private readonly IValidator<ProdutoRequestDto> _validator;
 
-    public ProdutoService(IProdutoRepository produtoRepository)
+    public ProdutoService(
+        IProdutoRepository produtoRepository,
+        IValidator<ProdutoRequestDto> validator
+    )
     {
         _produtoRepository = produtoRepository;
+        _validator = validator;
     }
 
     public async Task<IEnumerable<ProdutoResponseDto>> GetAllAsync()
@@ -29,6 +35,11 @@ public class ProdutoService : IProdutoService
 
     public async Task<ProdutoResponseDto> CreateAsync(ProdutoRequestDto dto)
     {
+        // Validar Produto
+        var validationResult = await _validator.ValidateAsync(dto);
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+
         var produto = new Produto
         {
             Nome = dto.Nome,

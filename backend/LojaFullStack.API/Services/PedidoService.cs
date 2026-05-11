@@ -1,4 +1,5 @@
-﻿using LojaFullStack.API.DTOs;
+﻿using FluentValidation;
+using LojaFullStack.API.DTOs;
 using LojaFullStack.API.Models;
 using LojaFullStack.API.Repositories.Interfaces;
 using LojaFullStack.API.Services.Interfaces;
@@ -10,15 +11,23 @@ public class PedidoService : IPedidoService
     private readonly IPedidoRepository _pedidoRepository;
     private readonly IClienteRepository _clienteRepository;
     private readonly IProdutoRepository _produtoRepository;
+    private readonly IValidator<PedidoRequestDto> _pedidoValidator;
+    private readonly IValidator<ItensPedidoRequestDto> _itensPedidoValidator;
+
 
     public PedidoService(
         IPedidoRepository pedidoRepository,
         IClienteRepository clienteRepository,
-        IProdutoRepository produtoRepository)
+        IProdutoRepository produtoRepository,
+        IValidator<PedidoRequestDto> pedidoValidator,
+        IValidator<ItensPedidoRequestDto> itensPedidoValidator
+    )
     {
         _pedidoRepository = pedidoRepository;
         _clienteRepository = clienteRepository;
         _produtoRepository = produtoRepository;
+        _pedidoValidator = pedidoValidator;
+        _itensPedidoValidator = itensPedidoValidator;
     }
 
     public async Task<IEnumerable<PedidoResponseDto>> GetAllAsync(DateTime? dataInicio, DateTime? dataFim, string? cnpj)
@@ -35,8 +44,10 @@ public class PedidoService : IPedidoService
 
     public async Task<PedidoResponseDto> CreateAsync(PedidoRequestDto dto)
     {
-        if (dto.Itens is null || dto.Itens.Count == 0)
-            throw new InvalidOperationException("O pedido deve conter pelo menos um item.");
+        // Validar Pedido
+        var validationResult = await _pedidoValidator.ValidateAsync(dto);
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
 
         // Busca cliente pelo CNPJ informado
         var cliente = await _clienteRepository.GetByCNPJAsync(dto.CNPJ);
@@ -81,6 +92,11 @@ public class PedidoService : IPedidoService
 
     public async Task<PedidoResponseDto> AddItemAsync(int codPedido, ItensPedidoRequestDto dto)
     {
+        // Validar Item do Pedido
+        var validationResult = await _itensPedidoValidator.ValidateAsync(dto);
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+
         // Verifica se o pedido existe
         var pedido = await _pedidoRepository.GetByIdAsync(codPedido);
         if (pedido is null)

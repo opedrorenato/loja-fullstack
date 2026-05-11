@@ -1,4 +1,4 @@
-﻿using LojaFullStack.API.DTOs;
+using LojaFullStack.API.DTOs;
 using LojaFullStack.API.Models;
 using LojaFullStack.API.Repositories.Interfaces;
 using LojaFullStack.API.Services.Interfaces;
@@ -60,6 +60,23 @@ public class ClienteService : IClienteService
         var id = await _clienteRepository.CreateAsync(cliente);
         var criado = await _clienteRepository.GetByIdAsync(id);
         return ToResponseDto(criado!);
+    }
+
+    public async Task UpdateAsync(int id, ClienteRequestDto dto)
+    {
+        var cliente = await _clienteRepository.GetByIdAsync(id);
+        if (cliente is null)
+            throw new InvalidOperationException("Cliente não encontrado.");
+
+        cliente.Nome = dto.Nome;
+        cliente.Email = dto.Email;
+
+        await _clienteRepository.UpdateAsync(cliente);
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        await _clienteRepository.DeleteAsync(id);
     }
 
     #region Utils

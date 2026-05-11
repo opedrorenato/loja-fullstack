@@ -13,4 +13,10 @@ export const clienteService = {
 
     create: (data: ClienteRequest) =>
         api.post<ClienteResponse>("/api/Cliente", data),
+
+    update: (id: number, data: ClienteRequest) =>
+        api.put(`/api/Cliente/${id}`, data),
+
+    delete: (id: number) =>
+        api.delete(`/api/Cliente/${id}`),
 };

@@ -18,10 +18,11 @@ async function request<T>(
         throw new Error(erro || `Erro ${response.status}`);
     }
 
-    // 204 No Content não tem body
+    // Se o status for 204 No Content ou o body estiver vazio, retorna undefined
     if (response.status === 204) return undefined as T;
 
-    return response.json();
+    const text = await response.text();
+    return text ? JSON.parse(text) : (undefined as T);
 }
 
 export const api = {

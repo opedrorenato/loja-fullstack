@@ -1,4 +1,4 @@
-﻿using LojaFullStack.API.DTOs;
+using LojaFullStack.API.DTOs;
 using LojaFullStack.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -68,5 +68,32 @@ public class ClienteController : ControllerBase
         {
             return Conflict(ex.Message);
         }
+    }
+
+    /// <summary>
+    /// Atualiza os dados de um cliente
+    /// </summary>
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, ClienteRequestDto dto)
+    {
+        try
+        {
+            await _clienteService.UpdateAsync(id, dto);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Remove um cliente com o ID especificado
+    /// </summary>
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _clienteService.DeleteAsync(id);
+        return NoContent();
     }
 }

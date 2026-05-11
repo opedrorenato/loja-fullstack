@@ -3,13 +3,13 @@ USE LojaDB;
 GO
 
 -- Clientes
-IF NOT EXISTS (SELECT 1 FROM dbo.Cliente WHERE CNPJ = '11.222.333/0001-81')
+IF NOT EXISTS (SELECT 1 FROM dbo.Cliente WHERE CNPJ = '11222333000181')
 BEGIN
     INSERT INTO dbo.Cliente (CNPJ, Nome, Email, DataCadastro) VALUES
-    ('11.222.333/0001-81', 'João da Silva',  'joao.silva@email.com',      GETDATE()),
-    ('22.333.444/0001-92', 'Maria Oliveira', 'maria.oliveira@email.com',  GETDATE()),
-    ('33.444.555/0001-03', 'Tech Solutions', 'contato@techsolutions.com', GETDATE()),
-    ('44.555.666/0001-14', 'Papelaria',      'papelaria@brasil.com',      GETDATE());
+    ('11222333000181', 'João da Silva',  'joao.silva@email.com',      GETDATE()),
+    ('22333444000192', 'Maria Oliveira', 'maria.oliveira@email.com',  GETDATE()),
+    ('33444555000103', 'Tech Solutions', 'contato@techsolutions.com', GETDATE()),
+    ('44555666000114', 'Papelaria',      'papelaria@brasil.com',      GETDATE());
 END
 GO
 

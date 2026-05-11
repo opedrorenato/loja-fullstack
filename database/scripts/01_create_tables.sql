@@ -13,7 +13,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Cliente')
 BEGIN
     CREATE TABLE Cliente (
         CodCliente    INT           NOT NULL IDENTITY(1,1),
-        CNPJ          VARCHAR(18)   NOT NULL,
+        CNPJ          VARCHAR(14)   NOT NULL,
         Nome          VARCHAR(150)  NOT NULL,
         Email         VARCHAR(150)  NOT NULL,
         DataCadastro  DATETIME      NOT NULL DEFAULT GETDATE(),

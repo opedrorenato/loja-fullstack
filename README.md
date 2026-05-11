@@ -1,5 +1,11 @@
 # loja-fullstack
 
+Novo deploy (fresh start) com docker-compose:
+```bash
+docker-compose down -v
+docker-compose up --build -d
+```
+
 ## Database
 
 ```bash

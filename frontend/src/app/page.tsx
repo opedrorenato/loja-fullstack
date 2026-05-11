@@ -33,6 +33,10 @@ export default function PedidosPage() {
   const [clientesFiltrados, setClientesFiltrados] = useState<ClienteResponse[]>([]);
   const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
 
+  // Paginação
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const itensPorPagina = 10;
+
   const buscarPedidos = useCallback(async () => {
     setLoading(true);
     setErro("");
@@ -46,6 +50,7 @@ export default function PedidosPage() {
       ]);
       setPedidos(pedidosData);
       setClientes(clientesData);
+      setPaginaAtual(1);
     } catch {
       setErro("Erro ao carregar pedidos.");
     } finally {
@@ -114,6 +119,12 @@ export default function PedidosPage() {
     setErroCnpj("");
   }
 
+  // Lógica de Paginação
+  const totalPaginas = Math.ceil(pedidosFiltrados.length / itensPorPagina);
+  const inicio = (paginaAtual - 1) * itensPorPagina;
+  const fim = inicio + itensPorPagina;
+  const pedidosPaginados = pedidosFiltrados.slice(inicio, fim);
+
   return (
   <>
     <Header
@@ -181,7 +192,7 @@ export default function PedidosPage() {
         </div>
         <Table
           loading={loading}
-          data={pedidosFiltrados}
+          data={pedidosPaginados}
           keyExtractor={(p) => p.codPedido}
           onRowClick={(p) => router.push(`/pedidos/${p.codPedido}`)}
           emptyMessage="Nenhum pedido encontrado."
@@ -236,6 +247,36 @@ export default function PedidosPage() {
             },
           ]}
         />
+
+        {/* Controles de Paginação */}
+        {totalPaginas > 1 && (
+          <div className="px-5 py-4 border-t border-slate-700 flex items-center justify-between bg-slate-800/50">
+            <div className="text-sm text-slate-400">
+              Mostrando <span className="text-slate-200">{inicio + 1}</span> até <span className="text-slate-200">{Math.min(fim, pedidosFiltrados.length)}</span> de <span className="text-slate-200">{pedidosFiltrados.length}</span> pedidos
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={paginaAtual === 1}
+                onClick={() => setPaginaAtual(p => p - 1)}
+              >
+                Anterior
+              </Button>
+              <div className="flex items-center px-4 text-sm font-medium text-slate-300">
+                Página {paginaAtual} de {totalPaginas}
+              </div>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={paginaAtual === totalPaginas}
+                onClick={() => setPaginaAtual(p => p + 1)}
+              >
+                Próxima
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
 

@@ -31,12 +31,17 @@ export default function ClientesPage() {
     const [clienteSelecionado, setClienteSelecionado] = useState<ClienteResponse | null>(null);
     const [processando, setProcessando] = useState(false);
 
+    // Paginação
+    const [paginaAtual, setPaginaAtual] = useState(1);
+    const itensPorPagina = 10;
+
     const carregarClientes = useCallback(async () => {
         setLoading(true);
         setErro("");
         try {
             const data = await clienteService.getAll();
             setClientes(data);
+            setPaginaAtual(1);
         } catch {
             setErro("Erro ao carregar clientes.");
         } finally {
@@ -159,6 +164,12 @@ export default function ClientesPage() {
         setModalExcluirAberto(true);
     }
 
+    // Lógica de Paginação
+    const totalPaginas = Math.ceil(clientes.length / itensPorPagina);
+    const inicio = (paginaAtual - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const clientesPaginados = clientes.slice(inicio, fim);
+
     return (
         <>
             <Header
@@ -193,7 +204,7 @@ export default function ClientesPage() {
 
                     <Table
                         loading={loading}
-                        data={clientes}
+                        data={clientesPaginados}
                         keyExtractor={(c) => c.codCliente}
                         emptyMessage="Nenhum cliente encontrado."
                         columns={[
@@ -255,6 +266,36 @@ export default function ClientesPage() {
                             },
                         ]}
                     />
+
+                    {/* Controles de Paginação */}
+                    {totalPaginas > 1 && (
+                        <div className="px-5 py-4 border-t border-slate-700 flex items-center justify-between bg-slate-800/50">
+                            <div className="text-sm text-slate-400">
+                                Mostrando <span className="text-slate-200">{inicio + 1}</span> até <span className="text-slate-200">{Math.min(fim, clientes.length)}</span> de <span className="text-slate-200">{clientes.length}</span> clientes
+                            </div>
+                            <div className="flex gap-2">
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    disabled={paginaAtual === 1}
+                                    onClick={() => setPaginaAtual(p => p - 1)}
+                                >
+                                    Anterior
+                                </Button>
+                                <div className="flex items-center px-4 text-sm font-medium text-slate-300">
+                                    Página {paginaAtual} de {totalPaginas}
+                                </div>
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    disabled={paginaAtual === totalPaginas}
+                                    onClick={() => setPaginaAtual(p => p + 1)}
+                                >
+                                    Próxima
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

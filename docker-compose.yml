@@ -41,9 +41,21 @@ services:
         condition: service_healthy
     networks:
       - loja-network
+
   # ============================================================
-  # Frontend — React (TO-DO)
+  # Frontend — Next.js
   # ============================================================
+  frontend:
+    build:
+      context: ./frontend/src
+      dockerfile: Dockerfile
+    container_name: loja-frontend-container
+    ports:
+      - "4000:4000"
+    depends_on:
+      - backend
+    networks:
+      - loja-network
 
 volumes:
   sqlserver_data:

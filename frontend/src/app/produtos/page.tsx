@@ -84,6 +84,7 @@ export default function ProdutosPage() {
             carregarProdutos();
         } catch (error: any) {
             setErro(error.message || "Erro ao criar produto.");
+            setModalNovoAberto(false);
         } finally {
             setCriando(false);
         }
@@ -126,6 +127,7 @@ export default function ProdutosPage() {
             carregarProdutos();
         } catch (error: any) {
             setErro(error.message || "Erro ao atualizar produto.");
+            setModalEditarAberto(false);
         } finally {
             setAtualizando(false);
         }

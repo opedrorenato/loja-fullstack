@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using LojaFullStack.API.DTOs;
 
 namespace LojaFullStack.API.Validators;
@@ -8,8 +8,8 @@ public class ProdutoRequestDtoValidator : AbstractValidator<ProdutoRequestDto>
     public ProdutoRequestDtoValidator()
     {
         RuleFor(x => x.Preco)
-            .GreaterThan(0)
-                .WithMessage("Deve ser informado um Preço válido");
+            .GreaterThanOrEqualTo(0)
+                .WithMessage("O preço deve ser positivo ou zero");
 
         RuleFor(x => x.Estoque)
             .GreaterThanOrEqualTo(0)

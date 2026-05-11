@@ -19,8 +19,8 @@ export default function ProdutosPage() {
     // Modal Novo Produto
     const [modalNovoAberto, setModalNovoAberto] = useState(false);
     const [nome, setNome] = useState("");
-    const [preco, setPreco] = useState("");
-    const [estoque, setEstoque] = useState("");
+    const [preco, setPreco] = useState("0");
+    const [estoque, setEstoque] = useState("0");
     const [criando, setCriando] = useState(false);
 
     // Modal Editar Produto
@@ -32,12 +32,20 @@ export default function ProdutosPage() {
     const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
     const [excluindo, setExcluindo] = useState(false);
 
+    // Paginação
+    const [paginaAtual, setPaginaAtual] = useState(1);
+    const itensPorPagina = 10;
+
+    // Erros de campos
+    const [errosCampos, setErrosCampos] = useState<{ [key: string]: string }>({});
+
     const carregarProdutos = useCallback(async () => {
         setLoading(true);
         setErro("");
         try {
             const data = await produtoService.getAll();
             setProdutos(data);
+            setPaginaAtual(1); // Resetar para primeira página ao carregar
         } catch {
             setErro("Erro ao carregar produtos.");
         } finally {
@@ -50,8 +58,17 @@ export default function ProdutosPage() {
     }, [carregarProdutos]);
 
     async function handleCriarProduto() {
-        if (!nome || !preco || !estoque) return;
+        const novosErros: { [key: string]: string } = {};
+        if (!nome) novosErros.nome = "O nome do produto é obrigatório.";
+        if (preco === "") novosErros.preco = "O preço é obrigatório.";
+        if (estoque === "") novosErros.estoque = "O estoque inicial é obrigatório.";
 
+        if (Object.keys(novosErros).length > 0) {
+            setErrosCampos(novosErros);
+            return;
+        }
+
+        setErrosCampos({});
         setCriando(true);
         try {
             const precoNumerico = Number(preco.replace(/\D/g, "")) / 100;
@@ -62,8 +79,8 @@ export default function ProdutosPage() {
             });
             setModalNovoAberto(false);
             setNome("");
-            setPreco("");
-            setEstoque("");
+            setPreco("0");
+            setEstoque("0");
             carregarProdutos();
         } catch (error: any) {
             setErro(error.message || "Erro ao criar produto.");
@@ -81,8 +98,19 @@ export default function ProdutosPage() {
     }
 
     async function handleEditarProduto() {
-        if (!produtoSelecionado || !nome || !preco || !estoque) return;
+        if (!produtoSelecionado) return;
 
+        const novosErros: { [key: string]: string } = {};
+        if (!nome) novosErros.nome = "O nome do produto é obrigatório.";
+        if (preco === "") novosErros.preco = "O preço é obrigatório.";
+        if (estoque === "") novosErros.estoque = "O estoque é obrigatório.";
+
+        if (Object.keys(novosErros).length > 0) {
+            setErrosCampos(novosErros);
+            return;
+        }
+
+        setErrosCampos({});
         setAtualizando(true);
         setErro("");
         try {
@@ -98,7 +126,6 @@ export default function ProdutosPage() {
             carregarProdutos();
         } catch (error: any) {
             setErro(error.message || "Erro ao atualizar produto.");
-            setModalEditarAberto(false);
         } finally {
             setAtualizando(false);
         }
@@ -122,6 +149,12 @@ export default function ProdutosPage() {
             setExcluindo(false);
         }
     }
+
+    // Lógica de Paginação
+    const totalPaginas = Math.ceil(produtos.length / itensPorPagina);
+    const inicio = (paginaAtual - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const produtosPaginados = produtos.slice(inicio, fim);
 
     return (
         <>
@@ -155,7 +188,7 @@ export default function ProdutosPage() {
 
                     <Table
                         loading={loading}
-                        data={produtos}
+                        data={produtosPaginados}
                         keyExtractor={(p) => p.codProduto}
                         emptyMessage="Nenhum produto encontrado."
                         columns={[
@@ -220,6 +253,36 @@ export default function ProdutosPage() {
                             },
                         ]}
                     />
+
+                    {/* Controles de Paginação */}
+                    {totalPaginas > 1 && (
+                        <div className="px-5 py-4 border-t border-slate-700 flex items-center justify-between bg-slate-800/50">
+                            <div className="text-sm text-slate-400">
+                                Mostrando <span className="text-slate-200">{inicio + 1}</span> até <span className="text-slate-200">{Math.min(fim, produtos.length)}</span> de <span className="text-slate-200">{produtos.length}</span> produtos
+                            </div>
+                            <div className="flex gap-2">
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    disabled={paginaAtual === 1}
+                                    onClick={() => setPaginaAtual(p => p - 1)}
+                                >
+                                    Anterior
+                                </Button>
+                                <div className="flex items-center px-4 text-sm font-medium text-slate-300">
+                                    Página {paginaAtual} de {totalPaginas}
+                                </div>
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    disabled={paginaAtual === totalPaginas}
+                                    onClick={() => setPaginaAtual(p => p + 1)}
+                                >
+                                    Próxima
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -240,7 +303,11 @@ export default function ProdutosPage() {
                         label="Nome do Produto"
                         placeholder="Ex: Teclado Mecânico"
                         value={nome}
-                        onChange={(e) => setNome(e.target.value)}
+                        onChange={(e) => {
+                            setNome(e.target.value);
+                            setErrosCampos(prev => ({ ...prev, nome: "" }));
+                        }}
+                        error={errosCampos.nome}
                     />
                     <div className="grid grid-cols-2 gap-4">
                         <Input
@@ -248,14 +315,25 @@ export default function ProdutosPage() {
                             placeholder="R$ 0,00"
                             mask="currency"
                             value={preco}
-                            onChange={(e) => setPreco(e.target.value)}
+                            onChange={(e) => {
+                                setPreco(e.target.value);
+                                setErrosCampos(prev => ({ ...prev, preco: "" }));
+                            }}
+                            error={errosCampos.preco}
                         />
                         <Input
                             label="Estoque Inicial"
                             type="number"
+                            min={0}
                             placeholder="0"
                             value={estoque}
-                            onChange={(e) => setEstoque(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val !== "" && Number(val) < 0) return;
+                                setEstoque(val);
+                                setErrosCampos(prev => ({ ...prev, estoque: "" }));
+                            }}
+                            error={errosCampos.estoque}
                         />
                     </div>
                 </div>
@@ -277,20 +355,35 @@ export default function ProdutosPage() {
                     <Input
                         label="Nome do Produto"
                         value={nome}
-                        onChange={(e) => setNome(e.target.value)}
+                        onChange={(e) => {
+                            setNome(e.target.value);
+                            setErrosCampos(prev => ({ ...prev, nome: "" }));
+                        }}
+                        error={errosCampos.nome}
                     />
                     <div className="grid grid-cols-2 gap-4">
                         <Input
                             label="Preço"
                             mask="currency"
                             value={preco}
-                            onChange={(e) => setPreco(e.target.value)}
+                            onChange={(e) => {
+                                setPreco(e.target.value);
+                                setErrosCampos(prev => ({ ...prev, preco: "" }));
+                            }}
+                            error={errosCampos.preco}
                         />
                         <Input
                             label="Quantidade em Estoque"
                             type="number"
+                            min={0}
                             value={estoque}
-                            onChange={(e) => setEstoque(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val !== "" && Number(val) < 0) return;
+                                setEstoque(val);
+                                setErrosCampos(prev => ({ ...prev, estoque: "" }));
+                            }}
+                            error={errosCampos.estoque}
                         />
                     </div>
                 </div>

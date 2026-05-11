@@ -1,4 +1,4 @@
-﻿using LojaFullStack.API.DTOs;
+using LojaFullStack.API.DTOs;
 using LojaFullStack.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -51,12 +51,22 @@ public class ProdutoController : ControllerBase
     }
 
     /// <summary>
+    /// Atualiza o estoque de um produto
+    /// </summary>
+    [HttpPatch("{id}/estoque")]
+    public async Task<IActionResult> UpdateEstoque(int id, [FromBody] int novoEstoque)
+    {
+        await _produtoService.UpdateEstoqueAsync(id, novoEstoque);
+        return NoContent();
+    }
+
+    /// <summary>
     /// Remove o produto com o ID especificado
     /// </summary>
     [HttpDelete]
     public async Task<IActionResult> Delete(int id)
     {
         await _produtoService.DeleteAsync(id);
-        return Ok();
+        return NoContent();
     }
 }

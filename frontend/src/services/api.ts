@@ -1,6 +1,6 @@
 const BASE_URL = "http://localhost:5000";
 
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 async function request<T>(
     endpoint: string,
@@ -27,5 +27,7 @@ async function request<T>(
 export const api = {
     get: <T>(endpoint: string) => request<T>(endpoint),
     post: <T>(endpoint: string, body: unknown) => request<T>(endpoint, "POST", body),
+    put: <T>(endpoint: string, body: unknown) => request<T>(endpoint, "PUT", body),
+    patch: <T>(endpoint: string, body: unknown) => request<T>(endpoint, "PATCH", body),
     delete: <T>(endpoint: string) => request<T>(endpoint, "DELETE"),
 };

@@ -1,4 +1,4 @@
-﻿using LojaFullStack.API.DTOs;
+using LojaFullStack.API.DTOs;
 using LojaFullStack.API.Models;
 using LojaFullStack.API.Repositories.Interfaces;
 using LojaFullStack.API.Services.Interfaces;
@@ -39,6 +39,11 @@ public class ProdutoService : IProdutoService
         var id = await _produtoRepository.CreateAsync(produto);
         var criado = await _produtoRepository.GetByIdAsync(id);
         return ToResponseDto(criado!);
+    }
+
+    public async Task UpdateEstoqueAsync(int id, int novoEstoque)
+    {
+        await _produtoRepository.UpdateEstoqueAsync(id, novoEstoque);
     }
 
     public async Task DeleteAsync(int codProduto)

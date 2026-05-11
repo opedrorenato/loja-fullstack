@@ -53,4 +53,6 @@ public class ClienteRepository : IClienteRepository
         var result = await conn.ExecuteScalarAsync<int>(query, cliente);
         return result;
     }
+
+    // to-do: DeleteAsync, UpdateAsync
 }

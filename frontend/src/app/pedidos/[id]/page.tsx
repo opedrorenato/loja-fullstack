@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/Button";
 import { pedidoService } from "@/services/pedido-service";
 import { PedidoResponse } from "@/types";
+import { formatarCnpj, formatarData, formatarMoeda } from "@/utils/format";
 
 export default function DetalhePedidoPage() {
     const router = useRouter();
@@ -29,19 +30,6 @@ export default function DetalhePedidoPage() {
     }, [id, router]);
 
     useEffect(() => { carregarPedido(); }, [carregarPedido]);
-
-    function formatarData(data: string) {
-        return new Date(data).toLocaleString("pt-BR");
-    }
-
-    function formatarValor(valor: number) {
-        return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    }
-
-    function formatarCnpj(cnpj: string) {
-        return cnpj.replace(/\D/g, "")
-            .replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
-    }
 
     if (loading) {
         return (
@@ -124,7 +112,7 @@ export default function DetalhePedidoPage() {
                                                 <div className="col-span-2">
                                                     <p className="text-sm font-medium text-white">{item.nomeProduto}</p>
                                                     <p className="text-xs text-slate-500 mt-0.5">
-                                                        {formatarValor(item.precoUnitario)} / un.
+                                                        {formatarMoeda(item.precoUnitario)} / un.
                                                     </p>
                                                 </div>
                                                 <div className="text-center">
@@ -134,7 +122,7 @@ export default function DetalhePedidoPage() {
                                                 </div>
                                                 <div className="text-right">
                                                     <span className="text-sm font-semibold text-blue-400">
-                                                        {formatarValor(item.subtotal)}
+                                                        {formatarMoeda(item.subtotal)}
                                                     </span>
                                                 </div>
                                             </div>
@@ -178,7 +166,7 @@ export default function DetalhePedidoPage() {
                                     <div className="flex justify-between items-center">
                                         <span className="text-sm font-semibold text-slate-300">Total</span>
                                         <span className="text-xl font-bold text-blue-400">
-                                            {formatarValor(pedido.valorTotal)}
+                                            {formatarMoeda(pedido.valorTotal)}
                                         </span>
                                     </div>
                                 </div>

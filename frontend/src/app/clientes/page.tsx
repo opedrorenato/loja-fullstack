@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Table } from "@/components/ui/Table";
 import { clienteService } from "@/services/cliente-service";
 import { ClienteResponse } from "@/types";
+import { formatarCnpj, formatarData } from "@/utils/format";
 
 export default function ClientesPage() {
     const [clientes, setClientes] = useState<ClienteResponse[]>([]);
@@ -156,15 +157,6 @@ export default function ClientesPage() {
     function handleAbrirExclusao(cliente: ClienteResponse) {
         setClienteSelecionado(cliente);
         setModalExcluirAberto(true);
-    }
-
-    function formatarData(data: string) {
-        return new Date(data).toLocaleDateString("pt-BR");
-    }
-
-    function formatarCnpj(cnpj: string) {
-        return cnpj.replace(/\D/g, "")
-            .replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
     }
 
     return (

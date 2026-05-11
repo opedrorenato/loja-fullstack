@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Table } from "@/components/ui/Table";
 import { produtoService } from "@/services/produto-service";
 import { ProdutoResponse } from "@/types";
+import { formatarMoeda } from "@/utils/format";
 
 export default function ProdutosPage() {
     const [produtos, setProdutos] = useState<ProdutoResponse[]>([]);
@@ -83,10 +84,6 @@ export default function ProdutosPage() {
         }
     }
 
-    function formatarValor(valor: number) {
-        return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    }
-
     return (
         <>
             <Header
@@ -135,7 +132,7 @@ export default function ProdutosPage() {
                             {
                                 header: "Preço",
                                 accessor: (p) => (
-                                    <span className="text-slate-300">{formatarValor(p.preco)}</span>
+                                    <span className="text-slate-300">{formatarMoeda(p.preco)}</span>
                                 ),
                             },
                             {

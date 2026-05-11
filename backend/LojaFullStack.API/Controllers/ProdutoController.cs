@@ -49,4 +49,14 @@ public class ProdutoController : ControllerBase
         var result = CreatedAtAction(nameof(GetById), new { id = produto.CodProduto }, produto);
         return result;
     }
+
+    /// <summary>
+    /// Remove o produto com o ID especificado
+    /// </summary>
+    [HttpDelete]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _produtoService.DeleteAsync(id);
+        return Ok();
+    }
 }

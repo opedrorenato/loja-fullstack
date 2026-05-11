@@ -41,6 +41,12 @@ public class ProdutoService : IProdutoService
         return ToResponseDto(criado!);
     }
 
+    public async Task DeleteAsync(int codProduto)
+    {
+        await _produtoRepository.DeleteAsync(codProduto);
+    }
+
+    // Utils
     private static ProdutoResponseDto ToResponseDto(Produto p) => new()
     {
         CodProduto = p.CodProduto,

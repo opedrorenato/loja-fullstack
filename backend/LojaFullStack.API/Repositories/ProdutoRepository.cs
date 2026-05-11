@@ -53,4 +53,12 @@ public class ProdutoRepository : IProdutoRepository
         await conn.ExecuteAsync(query,
             new { Estoque = novoEstoque, Id = codProduto });
     }
+
+    public async Task DeleteAsync(int codProduto)
+    {
+        using var conn = _factory.CreateConnection();
+        var query = @$"DELETE FROM Produto WHERE CodProduto = @Id";
+
+        await conn.ExecuteAsync(query, new { Id = codProduto });
+    }
 }

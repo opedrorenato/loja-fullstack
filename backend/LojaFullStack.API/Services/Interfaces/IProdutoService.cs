@@ -7,4 +7,5 @@ public interface IProdutoService
     Task<IEnumerable<ProdutoResponseDto>> GetAllAsync();
     Task<ProdutoResponseDto?> GetByIdAsync(int id);
     Task<ProdutoResponseDto> CreateAsync(ProdutoRequestDto dto);
+    Task DeleteAsync(int codProduto);
 }

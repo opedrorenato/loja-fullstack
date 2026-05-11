@@ -71,6 +71,13 @@ public class ProdutoRepository : IProdutoRepository
         return count > 0;
     }
 
+    public async Task<Produto?> GetByNameAsync(string nome)
+    {
+        using var conn = _factory.CreateConnection();
+        var query = "SELECT * FROM Produto WHERE Nome = @Nome";
+        return await conn.QueryFirstOrDefaultAsync<Produto>(query, new { Nome = nome });
+    }
+
     public async Task DeleteAsync(int codProduto)
     {
         using var conn = _factory.CreateConnection();

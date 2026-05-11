@@ -34,6 +34,7 @@ BEGIN
         Estoque     INT             NOT NULL DEFAULT 0,
 
         CONSTRAINT PK_Produto       PRIMARY KEY (CodProduto),
+        CONSTRAINT UQ_Produto_Nome  UNIQUE      (Nome),
         CONSTRAINT CK_Produto_Preco CHECK (Preco >= 0),
         CONSTRAINT CK_Produto_Estoque CHECK (Estoque >= 0)
     );

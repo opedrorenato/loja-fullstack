@@ -57,6 +57,10 @@ public class ProdutoController : ControllerBase
             var errors = ex.Errors.Select(e => e.ErrorMessage);
             return BadRequest(new { Errors = errors });
         }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
 
     /// <summary>

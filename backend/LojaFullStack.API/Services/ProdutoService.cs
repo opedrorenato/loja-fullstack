@@ -39,7 +39,13 @@ public class ProdutoService : IProdutoService
         var validationResult = await _validator.ValidateAsync(dto);
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
+        
+        // Validar Duplicidade
+        var produtoExistente = await _produtoRepository.GetByNameAsync(dto.Nome);
+        if (produtoExistente != null)
+            throw new InvalidOperationException("Já existe um produto cadastrado com este nome.");
 
+        // Criar
         var produto = new Produto
         {
             Nome = dto.Nome,
@@ -67,6 +73,11 @@ public class ProdutoService : IProdutoService
         var produto = await _produtoRepository.GetByIdAsync(id);
         if (produto is null)
             throw new InvalidOperationException("Produto não encontrado.");
+
+        // Validar Duplicidade
+        var produtoExistente = await _produtoRepository.GetByNameAsync(dto.Nome);
+        if (produtoExistente != null && produtoExistente.CodProduto != id)
+            throw new InvalidOperationException("Já existe um produto cadastrado com este nome.");
 
         produto.Nome = dto.Nome;
         produto.Preco = dto.Preco;

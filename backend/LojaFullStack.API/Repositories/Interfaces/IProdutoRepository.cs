@@ -10,5 +10,6 @@ public interface IProdutoRepository
     Task UpdateEstoqueAsync(int codProduto, int novoEstoque);
     Task UpdateAsync(Produto produto);
     Task<bool> HasItemsAsync(int codProduto);
+    Task<Produto?> GetByNameAsync(string nome);
     Task DeleteAsync(int codProduto);
 }

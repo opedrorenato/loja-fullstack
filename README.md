@@ -1,5 +1,12 @@
 # loja-fullstack
 
+  - [Intruções de deploy](#intruções-de-deploy)
+  - [Database](#database)
+  - [Backend](#backend)
+  - [Frontend](#frontend)
+
+---
+
 ## Intruções de deploy:
 
 O projeto tem a seguinte estrutura de pastas:
@@ -46,6 +53,10 @@ docker-compose up --build -d
 
 Também é possível executar cada serviço individualmente, com o Dockerfile de cada um.
 
+<div align="right"><a href="#loja-fullstack">⬆ Voltar ao Topo</a></div>
+
+---
+
 ## Database
 
 ```bash
@@ -55,22 +66,30 @@ docker run -d -p 1433:1433 --name loja-db-container loja-db
 ```
 
 Tabelas:
+
 ![](images/bd.png)
 
 Diagrama:
+
 ![](images/bd-diagrama.png)
 
 Tabela Cliente:
+
 ![](images/bd-tb-cliente.png)
 
 Tabela Produto:
+
 ![](images/bd-tb-produto.png)
 
 Tabela Pedido:
+
 ![](images/bd-tb-pedido.png)
 
 Tabela ItensPedido:
+
 ![](images/bd-tb-itenspedido.png)
+
+<div align="right"><a href="#loja-fullstack">⬆ Voltar ao Topo</a></div>
 
 ---
 
@@ -84,6 +103,8 @@ docker run -d -p 5000:5000 -e ConnectionStrings__DefaultConnection="Server=host.
 
 ![](images/backend-swagger.png)
 
+<div align="right"><a href="#loja-fullstack">⬆ Voltar ao Topo</a></div>
+
 ---
 
 ## Frontend
@@ -96,13 +117,21 @@ npm run dev -p 4001
 ```
 
 Tela Inicial/Pedidos:
+
 ![](images/frontend-pedidos.png)
 
 Novo Pedido:
+
 ![](images/frontend-novo-pedido.png)
 
 Tela de Clientes:
+
 ![](images/frontend-clientes.png)
 
 Tela de Produtos:
+
 ![](images/frontend-produtos.png)
+
+<div align="right"><a href="#loja-fullstack">⬆ Voltar ao Topo</a></div>
+
+---

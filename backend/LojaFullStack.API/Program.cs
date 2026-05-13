@@ -8,6 +8,7 @@ using LojaFullStack.API.Services.Interfaces;
 using LojaFullStack.API.Validators;
 using Microsoft.OpenApi;
 using System.Reflection;
+using LojaFullStack.API.Infrastructure.Middlewares;
 
 // Builder
 var builder = WebApplication.CreateBuilder(args);
@@ -77,6 +78,8 @@ builder.Services.AddCors(options =>
 
 // App
 var app = builder.Build();
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

@@ -1,4 +1,3 @@
-using FluentValidation;
 using LojaFullStack.API.DTOs;
 using LojaFullStack.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -60,20 +59,8 @@ public class ClienteController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(ClienteRequestDto dto)
     {
-        try
-        {
-            var cliente = await _clienteService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = cliente.CodCliente }, cliente);
-        }
-        catch (ValidationException ex)
-        {
-            var errors = ex.Errors.Select(e => e.ErrorMessage);
-            return BadRequest(new { Errors = errors });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        var cliente = await _clienteService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = cliente.CodCliente }, cliente);
     }
 
     /// <summary>
@@ -82,15 +69,8 @@ public class ClienteController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, ClienteRequestDto dto)
     {
-        try
-        {
-            await _clienteService.UpdateAsync(id, dto);
-            return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        await _clienteService.UpdateAsync(id, dto);
+        return NoContent();
     }
 
     /// <summary>

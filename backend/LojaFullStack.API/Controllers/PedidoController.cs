@@ -1,6 +1,5 @@
-﻿using LojaFullStack.API.DTOs;
+using LojaFullStack.API.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using FluentValidation;
 using LojaFullStack.API.Services.Interfaces;
 
 namespace LojaFullStack.API.Controllers;
@@ -49,21 +48,8 @@ public class PedidoController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(PedidoRequestDto dto)
     {
-        try
-        {
-            var pedido = await _pedidoService.CreateAsync(dto);
-            var result = CreatedAtAction(nameof(GetById), new { id = pedido.CodPedido }, pedido);
-            return result;
-        }
-        catch (ValidationException ex)
-        {
-            var errors = ex.Errors.Select(e => e.ErrorMessage);
-            return BadRequest(new { Errors = errors });
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        var pedido = await _pedidoService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = pedido.CodPedido }, pedido);
     }
 
     /// <summary>
@@ -72,24 +58,8 @@ public class PedidoController : ControllerBase
     [HttpPost("{id}/itens")]
     public async Task<IActionResult> AddItem(int id, ItensPedidoRequestDto dto)
     {
-        try
-        {
-            var pedido = await _pedidoService.AddItemAsync(id, dto);
-            return Ok(pedido);
-        }
-        catch (ValidationException ex)
-        {
-            var errors = ex.Errors.Select(e => e.ErrorMessage);
-            return BadRequest(new { Errors = errors });
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var pedido = await _pedidoService.AddItemAsync(id, dto);
+        return Ok(pedido);
     }
 
     /// <summary>
@@ -98,14 +68,7 @@ public class PedidoController : ControllerBase
     [HttpDelete("{id}/itens/{codProduto}")]
     public async Task<IActionResult> RemoveItem(int id, int codProduto)
     {
-        try
-        {
-            await _pedidoService.RemoveItemAsync(id, codProduto);
-            return NoContent();
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        await _pedidoService.RemoveItemAsync(id, codProduto);
+        return NoContent();
     }
 }

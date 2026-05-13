@@ -1,4 +1,3 @@
-using FluentValidation;
 using LojaFullStack.API.DTOs;
 using LojaFullStack.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -46,21 +45,8 @@ public class ProdutoController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(ProdutoRequestDto dto)
     {
-        try
-        {
-            var produto = await _produtoService.CreateAsync(dto);
-            var result = CreatedAtAction(nameof(GetById), new { id = produto.CodProduto }, produto);
-            return result;
-        }
-        catch (ValidationException ex)
-        {
-            var errors = ex.Errors.Select(e => e.ErrorMessage);
-            return BadRequest(new { Errors = errors });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        var produto = await _produtoService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = produto.CodProduto }, produto);
     }
 
     /// <summary>
@@ -69,20 +55,8 @@ public class ProdutoController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, ProdutoRequestDto dto)
     {
-        try
-        {
-            await _produtoService.UpdateAsync(id, dto);
-            return NoContent();
-        }
-        catch (ValidationException ex)
-        {
-            var errors = ex.Errors.Select(e => e.ErrorMessage);
-            return BadRequest(new { Errors = errors });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        await _produtoService.UpdateAsync(id, dto);
+        return NoContent();
     }
 
     /// <summary>
@@ -91,14 +65,7 @@ public class ProdutoController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        try
-        {
-            await _produtoService.DeleteAsync(id);
-            return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
-        }
+        await _produtoService.DeleteAsync(id);
+        return NoContent();
     }
 }
